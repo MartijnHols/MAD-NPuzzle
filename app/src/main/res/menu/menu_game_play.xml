@@ -1,0 +1,32 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto"
+      xmlns:tools="http://schemas.android.com/tools"
+      tools:context="han.ica.projects.nPuzzle492724.GamePlay">
+    <item android:id="@+id/action_shuffle"
+          android:title="@string/reshuffle"
+          android:orderInCategory="100"
+          app:showAsAction="never"/>
+    <item android:id="@+id/submenu_moeilijkheidsgraad"
+          android:title="@string/changeDifficulty"
+          android:orderInCategory="100"
+          app:showAsAction="never">
+        <menu>
+            <item android:id="@+id/action_easy"
+                  android:title="@string/easy"
+                  android:orderInCategory="100"
+                  app:showAsAction="never"/>
+            <item android:id="@+id/action_medium"
+                  android:title="@string/medium"
+                  android:orderInCategory="100"
+                  app:showAsAction="never"/>
+            <item android:id="@+id/action_hard"
+                  android:title="@string/hard"
+                  android:orderInCategory="100"
+                  app:showAsAction="never"/>
+        </menu>
+    </item>
+    <item android:id="@+id/action_stop"
+          android:title="@string/stop"
+          android:orderInCategory="100"
+          app:showAsAction="never"/>
+</menu>

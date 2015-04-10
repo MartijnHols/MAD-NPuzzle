@@ -11,6 +11,11 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.DecelerateInterpolator;
+import android.view.animation.GridLayoutAnimationController;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.Toast;
@@ -32,6 +37,7 @@ public class GamePlay extends ActionBarActivity implements AdapterView.OnItemCli
 	private int emptyTilePosition;
 
 	protected GridView gvPuzzle;
+    protected View vRectangle;
 
 	private Toast toast;
 
@@ -48,6 +54,9 @@ public class GamePlay extends ActionBarActivity implements AdapterView.OnItemCli
 		difficulty = i.getIntExtra("difficulty", 1);
 
 		gvPuzzle = (GridView) findViewById(R.id.gvPuzzle);
+
+        vRectangle = (View) findViewById(R.id.vRectangle);
+
 
 		prepareGame();
 	}
@@ -111,6 +120,16 @@ public class GamePlay extends ActionBarActivity implements AdapterView.OnItemCli
 			}
 		}, 0, 1000 / 35);
 	}
+
+    private void flashbang(){
+        //Animation anim = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.abc_fade_out);
+        vRectangle.setAlpha(1);
+        vRectangle.animate().alpha(0).setInterpolator(new AccelerateInterpolator()).setDuration(3000).start();
+//        vRectangle.setAnimation(anim);
+//        anim.setDuration(3000);
+//        anim.setInterpolator(new AccelerateInterpolator());
+//        anim.start();
+    }
 
 	public void cancelTimers() {
 		if (tmrDisplaySolution != null) {
@@ -190,6 +209,9 @@ public class GamePlay extends ActionBarActivity implements AdapterView.OnItemCli
 		tiles[position] = emptyTile;
 		emptyTilePosition = position;
 		gvPuzzle.invalidateViews();
+        if(isActive) {
+            flashbang();
+        }
 	}
 
 	public List<Integer> getValidMoves() {

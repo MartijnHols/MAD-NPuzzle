@@ -4,6 +4,8 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -55,6 +57,9 @@ public class ImageTilesAdapter extends BaseAdapter {
 
 		picture.setImageBitmap(tile.getBitmap());
         text.setText(tile.getText());
+//        Animation anim = AnimationUtils.loadAnimation(v.getContext(), R.anim.slide_to_left);
+//        v.setAnimation(anim);
+//        anim.start();
 
 		return v;
 	}

@@ -64,6 +64,7 @@ public class GamePlay extends ActionBarActivity implements AdapterView.OnItemCli
 
 	private Timer tmrDisplaySolution;
 	private Timer tmrShuffler;
+    private Timer tmrResetNumbers;
 
 	public void prepareGame() {
 		tiles = getTiles();
@@ -132,6 +133,10 @@ public class GamePlay extends ActionBarActivity implements AdapterView.OnItemCli
 		if (tmrShuffler != null) {
 			tmrShuffler.cancel();
 			tmrShuffler = null;
+		}
+		if (tmrResetNumbers != null) {
+            tmrResetNumbers.cancel();
+            tmrResetNumbers = null;
 		}
 	}
 
@@ -203,27 +208,53 @@ public class GamePlay extends ActionBarActivity implements AdapterView.OnItemCli
 		tiles[position] = emptyTile;
 		emptyTilePosition = position;
         if(isActive) {
-            randomTileNumbers();
+            randomizeTileNumbers();
         }
 		gvPuzzle.invalidateViews();
 	}
 
-    private void randomTileNumbers() {
-        int[] numbers = getSequentialArray(difficulty + 1);
+    private void randomizeTileNumbers() {
+        int[] numbers = getSequentialArray(difficulty);
         int[] randomizedArray = randomizeArray(numbers);
 
         int emptyTileNo = -1;
         for (int i = 0; i < (difficulty + 1); i++) {
-            if (tiles[i] instanceof EmptyTile) {
-                emptyTileNo = i;
-                continue;
-            }
-            int number = randomizedArray[i];
+            int number;
             if (i == difficulty) {
                 number = emptyTileNo;
+            } else {
+                number = randomizedArray[i];
+            }
+            if (tiles[i] instanceof EmptyTile) {
+                emptyTileNo = number;
+                continue;
             }
             tiles[i].setText(String.format("%d", number));
         }
+
+        if (tmrResetNumbers != null) {
+            tmrResetNumbers.cancel();
+        }
+        tmrResetNumbers = new Timer();
+        tmrResetNumbers.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                resetTileNumber();
+            }
+        }, 10 * 1000);
+    }
+    private void resetTileNumber() {
+        for (int i = 0; i < (difficulty + 1); i++) {
+            Tile tile = tiles[i];
+            tile.setText(String.format("%d", tile.getNumber() + 1));
+        }
+
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                gvPuzzle.invalidateViews();
+            }
+        });
     }
 
     private int[] getSequentialArray(int num) {

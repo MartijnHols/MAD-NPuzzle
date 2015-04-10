@@ -8,12 +8,14 @@ import android.graphics.Bitmap;
 public class Tile {
 	protected int number;
 	protected Bitmap bitmap;
+    protected String text;
 
 	public Tile() {
 	}
-	public Tile(int number, Bitmap bitmap) {
+	public Tile(int number, Bitmap bitmap, String text) {
 		this.number = number;
 		this.bitmap = bitmap;
+        this.text = text;
 	}
 
 	public int getNumber() {
@@ -23,7 +25,11 @@ public class Tile {
 		return bitmap;
 	}
     public String getText() {
-        return String.format("%d", this.number + 1);
+        return text;
+    }
+    public void setText(String text){
+        this.text = text;
     }
 }
+
 

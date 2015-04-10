@@ -22,6 +22,7 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -121,15 +122,7 @@ public class GamePlay extends ActionBarActivity implements AdapterView.OnItemCli
 		}, 0, 1000 / 35);
 	}
 
-    private void flashbang(){
-        //Animation anim = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.abc_fade_out);
-        vRectangle.setAlpha(1);
-        vRectangle.animate().alpha(0).setInterpolator(new AccelerateInterpolator()).setDuration(3000).start();
-//        vRectangle.setAnimation(anim);
-//        anim.setDuration(3000);
-//        anim.setInterpolator(new AccelerateInterpolator());
-//        anim.start();
-    }
+
 
 	public void cancelTimers() {
 		if (tmrDisplaySolution != null) {
@@ -167,8 +160,9 @@ public class GamePlay extends ActionBarActivity implements AdapterView.OnItemCli
 			int x = (tileWidth * (i % columns));
 			int y = (int) (tileWidth * Math.floor(i / columns));
 			Bitmap bitmap = Bitmap.createBitmap(image.getBitmap(), x, y, tileWidth, tileHeight);
+            String text = String.format("%d", i + 1);
 
-			tiles[i] = new Tile(i, bitmap);
+			tiles[i] = new Tile(i, bitmap, text);
 		}
 		emptyTilePosition = difficulty;
 		tiles[emptyTilePosition] = new EmptyTile(emptyTilePosition, getBlackBitmap(tileWidth, tileHeight));
@@ -208,11 +202,67 @@ public class GamePlay extends ActionBarActivity implements AdapterView.OnItemCli
 		tiles[emptyTilePosition] = tiles[position];
 		tiles[position] = emptyTile;
 		emptyTilePosition = position;
-		gvPuzzle.invalidateViews();
         if(isActive) {
-            flashbang();
+            randomTileNumbers();
         }
+		gvPuzzle.invalidateViews();
 	}
+
+    private void randomTileNumbers() {
+        int[] numbers = getSequentialArray(difficulty + 1);
+        int[] randomizedArray = randomizeArray(numbers);
+
+        int emptyTileNo = -1;
+        for (int i = 0; i < (difficulty + 1); i++) {
+            if (tiles[i] instanceof EmptyTile) {
+                emptyTileNo = i;
+                continue;
+            }
+            int number = randomizedArray[i];
+            if (i == difficulty) {
+                number = emptyTileNo;
+            }
+            tiles[i].setText(String.format("%d", number));
+        }
+    }
+
+    private int[] getSequentialArray(int num) {
+        int[] numbers = new int[num];
+        for (int i = 0; i < num; i++) {
+            numbers[i] = i + 1;
+        }
+        return numbers;
+    }
+
+    private int[] randomizeArray(int[] ar){
+        Random rnd = new Random();
+        for (int i = ar.length - 1; i > 0; i--)
+        {
+            int index = rnd.nextInt(i + 1);
+            // Simple swap
+            int a = ar[index];
+            ar[index] = ar[i];
+            ar[i] = a;
+        }
+        return ar;
+    }
+
+
+    private void rotateMirror(){
+        gvPuzzle.animate().rotationYBy(180).setDuration(800).start();
+    }
+
+    private void flashbang(){
+        vRectangle.setAlpha(1);
+        vRectangle.animate().alpha(0).setInterpolator(new AccelerateInterpolator()).setDuration(3000).start();
+
+        /*OLD
+        Animation anim = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.abc_fade_out);
+        vRectangle.setAnimation(anim);
+        anim.setDuration(3000);
+        anim.setInterpolator(new AccelerateInterpolator());
+        anim.start();*/
+    }
 
 	public List<Integer> getValidMoves() {
 		List<Integer> lstValidMoves = new ArrayList<Integer>();

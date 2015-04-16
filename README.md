@@ -2,6 +2,7 @@
 MAD nPuzzle eindopdracht Lars Heesakkers (493712) & Martijn Hols (492724)
 
 Multiplayer element features:
+* Player 2 kiest een afbeelding voor Player 1 en vice versa
 
 Bij het voor de eerste keer afmaken van 1 hele rij of kolom wordt er een willekeurige actie bij de tegenstander of bij de speler zelf uitgevoerd.
 

@@ -12,38 +12,26 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.view.animation.DecelerateInterpolator;
-import android.view.animation.GridLayoutAnimationController;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.Toast;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
 
 public class GamePlay extends ActionBarActivity implements AdapterView.OnItemClickListener {
-	public static final int DIFFICULTY_EASY = 8;
-	public static final int DIFFICULTY_MEDIUM = 15;
-	public static final int DIFFICULTY_HARD = 24;
+    public Game game;
 
 	private Image image;
-	private int difficulty;
 	private Tile[] tiles;
-	private int emptyTilePosition;
 
 	protected GridView gvPuzzle;
     protected View vRectangle;
 
 	private Toast toast;
-
-	public int playerMoves;
-
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -51,13 +39,14 @@ public class GamePlay extends ActionBarActivity implements AdapterView.OnItemCli
 		setContentView(R.layout.activity_game_play);
 
 		Intent i = getIntent();
-		image = new Image(this, i.getIntExtra("resourceId", 0));
-		difficulty = i.getIntExtra("difficulty", 1);
-
+        
+        game = new Game();
+        game.imageResourceId = i.getIntExtra("resourceId", 0);
+        game.difficulty = i.getIntExtra("difficulty", 1);
+        
+		image = new Image(this, game.imageResourceId);
 		gvPuzzle = (GridView) findViewById(R.id.gvPuzzle);
-
         vRectangle = (View) findViewById(R.id.vRectangle);
-
 
 		prepareGame();
 	}
@@ -68,15 +57,20 @@ public class GamePlay extends ActionBarActivity implements AdapterView.OnItemCli
 
 	public void prepareGame() {
 		tiles = getTiles();
+        int[] tilePositions = new int[tiles.length];
+        for (int i = 0; i < tiles.length; i++) {
+            tilePositions[i] = tiles[i].getNumber();
+        }
+        game.tilePositions = tilePositions;
 
-		gvPuzzle.setNumColumns(getColumns());
+		gvPuzzle.setNumColumns(game.getRows());
 		gvPuzzle.setAdapter(new ImageTilesAdapter(this, tiles));
 		gvPuzzle.setOnItemClickListener(this);
 
-		playerMoves = 0;
+		game.numMoves = 0;
 
 		// Wacht 3 seconden om het verwachte resultaat te tonen
-		isActive = false;
+		game.isActive = false;
 
 		cancelTimers();
 		tmrDisplaySolution = new Timer();
@@ -89,7 +83,7 @@ public class GamePlay extends ActionBarActivity implements AdapterView.OnItemCli
 	}
 
 	public void shuffle() {
-		final int shuffleMoves = 10 + difficulty * 5;
+		final int shuffleMoves = 10 + game.difficulty * 5;
 		Log.d("NPuzzle", "Shuffle " + shuffleMoves + " keer");
 
 		cancelTimers();
@@ -113,17 +107,16 @@ public class GamePlay extends ActionBarActivity implements AdapterView.OnItemCli
 				getActivity().runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
-						if (!isActive) {
+						if (!game.isActive) {
 							//Log.d("NPuzzle", "Shuffling...");
-							doPseudoRandomMove();
+							game.doPseudoRandomMove();
+                            updateTilePositions();
 						}
 					}
 				});
 			}
 		}, 0, 1000 / 35);
 	}
-
-
 
 	public void cancelTimers() {
 		if (tmrDisplaySolution != null) {
@@ -142,7 +135,7 @@ public class GamePlay extends ActionBarActivity implements AdapterView.OnItemCli
 
 	public void begin() {
 		Log.d("NPuzzle", "Start!");
-		isActive = true;
+		game.isActive = true;
 		toast("Succes!");
 	}
 
@@ -150,18 +143,15 @@ public class GamePlay extends ActionBarActivity implements AdapterView.OnItemCli
 		return this;
 	}
 
-	protected int getColumns() {
-		return (int) Math.sqrt(difficulty + 1);
-	}
-
 	protected Tile[] getTiles() {
-		int columns = getColumns();
+		int columns = game.getRows();
 		int width = image.getBitmap().getWidth();
+		int height = image.getBitmap().getHeight();
 		int tileWidth = width / columns;
-		int tileHeight = tileWidth;
+		int tileHeight = height / columns;
 
-		Tile[] tiles = new Tile[difficulty + 1];
-		for (int i = 0; i < difficulty; i++) {
+		Tile[] tiles = new Tile[game.difficulty + 1];
+		for (int i = 0; i < game.difficulty; i++) {
 			int x = (tileWidth * (i % columns));
 			int y = (int) (tileWidth * Math.floor(i / columns));
 			Bitmap bitmap = Bitmap.createBitmap(image.getBitmap(), x, y, tileWidth, tileHeight);
@@ -169,8 +159,8 @@ public class GamePlay extends ActionBarActivity implements AdapterView.OnItemCli
 
 			tiles[i] = new Tile(i, bitmap, text);
 		}
-		emptyTilePosition = difficulty;
-		tiles[emptyTilePosition] = new EmptyTile(emptyTilePosition, getBlackBitmap(tileWidth, tileHeight));
+		game.emptyTilePosition = game.difficulty;
+		tiles[game.emptyTilePosition] = new EmptyTile(game.emptyTilePosition, getBlackBitmap(tileWidth, tileHeight));
 		return tiles;
 	}
 
@@ -186,41 +176,29 @@ public class GamePlay extends ActionBarActivity implements AdapterView.OnItemCli
 		return bmp;
 	}
 
-	protected boolean isGameComplete() {
-		for (int i = 0; i < tiles.length; i++) {
-			if (tiles[i].number != i) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	protected boolean isActive = false;
-
-	public boolean canMoveTile(int position) {
-		List<Integer> lstValidMoves = getValidMoves();
-		return lstValidMoves.contains(position);
-	}
-
-	public void moveTile(int position) {
-		EmptyTile emptyTile = (EmptyTile) tiles[emptyTilePosition];
-		tiles[emptyTilePosition] = tiles[position];
-		tiles[position] = emptyTile;
-		emptyTilePosition = position;
-        if(isActive) {
-            randomizeTileNumbers();
+    public void moveTile(int position) {
+        game.moveTile(position);
+        updateTilePositions();
+    }
+    public void updateTilePositions() {
+        HashMap<Integer, Tile> dictTiles = new HashMap<>();
+        for (Tile tile : tiles) {
+            dictTiles.put(tile.getNumber(), tile);
         }
-		gvPuzzle.invalidateViews();
-	}
+        for (int i = 0; i < tiles.length; i++) {
+            tiles[i] = dictTiles.get(game.tilePositions[i]);
+        }
+        gvPuzzle.invalidateViews();
+    }
 
     private void randomizeTileNumbers() {
-        int[] numbers = getSequentialArray(difficulty);
+        int[] numbers = getSequentialArray(game.difficulty);
         int[] randomizedArray = randomizeArray(numbers);
 
         int emptyTileNo = -1;
-        for (int i = 0; i < (difficulty + 1); i++) {
+        for (int i = 0; i < (game.difficulty + 1); i++) {
             int number;
-            if (i == difficulty) {
+            if (i == game.difficulty) {
                 number = emptyTileNo;
             } else {
                 number = randomizedArray[i];
@@ -231,6 +209,8 @@ public class GamePlay extends ActionBarActivity implements AdapterView.OnItemCli
             }
             tiles[i].setText(String.format("%d", number));
         }
+
+        toast("Shuffled tile numbers!");
 
         if (tmrResetNumbers != null) {
             tmrResetNumbers.cancel();
@@ -244,7 +224,7 @@ public class GamePlay extends ActionBarActivity implements AdapterView.OnItemCli
         }, 10 * 1000);
     }
     private void resetTileNumber() {
-        for (int i = 0; i < (difficulty + 1); i++) {
+        for (int i = 0; i < (game.difficulty + 1); i++) {
             Tile tile = tiles[i];
             tile.setText(String.format("%d", tile.getNumber() + 1));
         }
@@ -280,6 +260,7 @@ public class GamePlay extends ActionBarActivity implements AdapterView.OnItemCli
 
 
     private void rotateMirror(){
+        toast("Rotate!");
         gvPuzzle.animate().rotationYBy(180).setDuration(800).start();
     }
 
@@ -287,80 +268,24 @@ public class GamePlay extends ActionBarActivity implements AdapterView.OnItemCli
         vRectangle.setAlpha(1);
         vRectangle.animate().alpha(0).setInterpolator(new AccelerateInterpolator()).setDuration(3000).start();
 
-        /*OLD
-        Animation anim = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.abc_fade_out);
-        vRectangle.setAnimation(anim);
-        anim.setDuration(3000);
-        anim.setInterpolator(new AccelerateInterpolator());
-        anim.start();*/
+        toast("Flashbang!");
     }
-
-	public List<Integer> getValidMoves() {
-		List<Integer> lstValidMoves = new ArrayList<Integer>();
-		int columns = getColumns();
-		if (emptyTilePosition - columns >= 0) { // boven
-			lstValidMoves.add(emptyTilePosition - columns);
-		}
-		if (emptyTilePosition + columns < tiles.length) { // onder
-			lstValidMoves.add(emptyTilePosition + columns);
-		}
-		if (emptyTilePosition - 1 >= 0 && Math.floor((emptyTilePosition - 1) / columns) == Math.floor(emptyTilePosition / columns)) { // links
-			lstValidMoves.add(emptyTilePosition - 1);
-		}
-		if (emptyTilePosition + 1 < tiles.length && Math.floor((emptyTilePosition + 1) / columns) == Math.floor(emptyTilePosition / columns)) { // links
-			lstValidMoves.add(emptyTilePosition + 1);
-		}
-		return lstValidMoves;
-	}
-
-	public int getRandomMove() {
-		List<Integer> lstValidMoves = getValidMoves();
-		int i = (int) Math.floor(Math.random() * lstValidMoves.size());
-		return lstValidMoves.get(i);
-	}
-
-	public void doRandomMove() {
-		int position = getRandomMove();
-		moveTile(position);
-	}
-
-	/**
-	 * Verplaatse een tile naar een pseudorandom plek. Op dit moment is de enige check hier dat de laatste move niet ongedaan gemaakt wordt.
-	 */
-	private int previousPosition;
-
-	public void doPseudoRandomMove() {
-		int position;
-		do {
-			position = getRandomMove();
-			//Log.d("NPuzzle", String.format("previousPosition:%d position:%d", previousPosition, position));
-		} while (previousPosition == position);
-		previousPosition = emptyTilePosition;
-
-		moveTile(position);
-	}
 
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-		if (!isActive) {
+		if (!game.isActive) {
 			toast("Even geduld...");
 			return;
 		}
-		if (canMoveTile(position)) {
+		if (game.canMoveTile(position)) {
 			moveTile(position);
-			playerMoves++;
-			if (toast != null) {
-				toast.cancel();
-				toast = null;
-			}
-		} else {
-			toast("Alleen vakjes direct boven, onder, links of rechts van het lege vakje kunnen worden verplaatst.");
+            game.numMoves++;
 		}
 
-		if (isGameComplete()) {
-			isActive = false;
+		if (game.isGameComplete()) {
+			game.isActive = false;
 			Intent i = new Intent(this, YouWin.class);
-			i.putExtra("playerMoves", playerMoves)
+			i.putExtra("playerMoves", game.numMoves)
 				.putExtra("resourceId", image.getResourceId());
 			startActivity(i);
 			end();
@@ -401,22 +326,22 @@ public class GamePlay extends ActionBarActivity implements AdapterView.OnItemCli
 				onBackPressed();
 				return true;
 			case R.id.action_shuffle:
-				isActive = false;
+				game.isActive = false;
 				shuffle();
 				return true;
 			case R.id.action_stop:
 				finish();
 				return true;
 			case R.id.action_easy:
-				difficulty = DIFFICULTY_EASY;
+				game.difficulty = Game.DIFFICULTY_EASY;
 				prepareGame();
 				return true;
 			case R.id.action_medium:
-				difficulty = DIFFICULTY_MEDIUM;
+				game.difficulty = Game.DIFFICULTY_MEDIUM;
 				prepareGame();
 				return true;
 			case R.id.action_hard:
-				difficulty = DIFFICULTY_HARD;
+				game.difficulty = Game.DIFFICULTY_HARD;
 				prepareGame();
 				return true;
 		}

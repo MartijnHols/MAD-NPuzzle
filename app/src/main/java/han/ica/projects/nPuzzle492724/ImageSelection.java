@@ -23,13 +23,13 @@ public class ImageSelection extends ActionBarActivity implements AdapterView.OnI
 
 	public int getDifficulty() {
 		if (rbEasy.isChecked()) {
-			return GamePlay.DIFFICULTY_EASY;
+			return Game.DIFFICULTY_EASY;
 		} else if (rbMedium.isChecked()) {
-			return GamePlay.DIFFICULTY_MEDIUM;
+			return Game.DIFFICULTY_MEDIUM;
 		} else if (rbHard.isChecked()) {
-			return GamePlay.DIFFICULTY_HARD;
+			return Game.DIFFICULTY_HARD;
 		}
-		return GamePlay.DIFFICULTY_HARD;
+		return Game.DIFFICULTY_HARD;
 	}
 
 	private List<Image> getImages() {

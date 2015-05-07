@@ -14,7 +14,7 @@ public class ModeSelection extends ActionBarActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_select_mode);
+		setContentView(R.layout.activity_mode_selection);
 
 		btnSingleplayer = (Button) findViewById(R.id.btnSingleplayer);
 		btnMultiplayer = (Button) findViewById(R.id.btnMultiplayer);

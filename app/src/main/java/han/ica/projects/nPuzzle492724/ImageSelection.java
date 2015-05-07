@@ -18,10 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.java_websocket.client.WebSocketClient;
-import org.java_websocket.drafts.Draft_10;
 import org.java_websocket.drafts.Draft_17;
-import org.java_websocket.drafts.Draft_75;
-import org.java_websocket.drafts.Draft_76;
 import org.java_websocket.handshake.ServerHandshake;
 
 public class ImageSelection extends ActionBarActivity implements AdapterView.OnItemClickListener {

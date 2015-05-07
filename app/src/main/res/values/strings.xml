@@ -1,8 +1,10 @@
 <resources>
     <string name="app_name">n-Puzzle</string>
 
+    <string name="title_activity_select_mode">Welkom!</string>
     <string name="title_activity_game_play">Puzzle</string>
     <string name="title_activity_you_win">Geslaagd!</string>
+
     <string name="reshuffle">Reshuffle</string>
     <string name="changeDifficulty">Verander moeilijkheidsgraad</string>
     <string name="easy">Makkelijk</string>
@@ -13,4 +15,7 @@
     <string name="congratulations">Gefeliciteerd, je hebt de puzzel opgelost!</string>
     <string name="moves">Moves:</string>
     <string name="newGame">Nieuw spel</string>
+    <string name="chooseMode">Kies je modus:</string>
+    <string name="singleplayer">Singleplayer</string>
+    <string name="multiplayer">Multiplayer</string>
 </resources>

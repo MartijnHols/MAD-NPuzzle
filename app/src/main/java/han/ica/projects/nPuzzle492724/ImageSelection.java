@@ -93,7 +93,8 @@ public class ImageSelection extends ActionBarActivity implements AdapterView.OnI
             @Override
             public void onOpen(ServerHandshake serverHandshake) {
                 Log.i("Websocket", "Opened");
-                mWebSocketClient.send("Hello from " + Build.MANUFACTURER + " " + Build.MODEL);
+//                mWebSocketClient.send("{\"command\":\"test\",\"data\":{\"location\": {lat:168.5621,long:200.1232131245}}}");
+                mWebSocketClient.send("{\"command\":\"register\",\"data\":{\"lat\": \"testlat\",\"lon\": \"testlon\"}}");
             }
 
             @Override

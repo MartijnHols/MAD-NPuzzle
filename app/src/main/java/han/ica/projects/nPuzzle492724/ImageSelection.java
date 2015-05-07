@@ -1,16 +1,28 @@
 package han.ica.projects.nPuzzle492724;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.RadioButton;
+import android.widget.TextView;
 
 import java.lang.reflect.Field;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.java_websocket.client.WebSocketClient;
+import org.java_websocket.drafts.Draft_10;
+import org.java_websocket.drafts.Draft_17;
+import org.java_websocket.drafts.Draft_75;
+import org.java_websocket.drafts.Draft_76;
+import org.java_websocket.handshake.ServerHandshake;
 
 public class ImageSelection extends ActionBarActivity implements AdapterView.OnItemClickListener {
 	protected RadioButton rbEasy;
@@ -58,6 +70,7 @@ public class ImageSelection extends ActionBarActivity implements AdapterView.OnI
 
 		gvImageSelection.setAdapter(new ImageSelectionAdapter(this, getImages()));
 		gvImageSelection.setOnItemClickListener(this);
+        connectWebSocket();
 	}
 
 	@Override
@@ -67,4 +80,49 @@ public class ImageSelection extends ActionBarActivity implements AdapterView.OnI
 			.putExtra("difficulty", getDifficulty());
 		startActivity(i);
 	}
+
+    private WebSocketClient mWebSocketClient;
+
+    private void connectWebSocket() {
+        URI uri;
+        try {
+            uri = new URI("ws://192.168.0.27:1337");
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        mWebSocketClient = new WebSocketClient(uri, new Draft_17()) {
+            @Override
+            public void onOpen(ServerHandshake serverHandshake) {
+                Log.i("Websocket", "Opened");
+                mWebSocketClient.send("Hello from " + Build.MANUFACTURER + " " + Build.MODEL);
+            }
+
+            @Override
+            public void onMessage(String s) {
+                final String message = s;
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+//                        TextView textView = (TextView)findViewById(R.id.messages);
+//                        textView.setText(textView.getText() + "\n" + message);
+                        Log.d("kip", message);
+                    }
+                });
+            }
+
+            @Override
+            public void onClose(int i, String s, boolean b) {
+                Log.i("Websocket", "Closed " + s);
+            }
+
+            @Override
+            public void onError(Exception e) {
+                Log.i("Websocket", "Error " + e.getMessage());
+            }
+        };
+        mWebSocketClient.connect();
+    }
+
 }

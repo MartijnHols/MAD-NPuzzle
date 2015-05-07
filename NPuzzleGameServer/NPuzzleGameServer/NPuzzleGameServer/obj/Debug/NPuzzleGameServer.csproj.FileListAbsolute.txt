@@ -1,0 +1,8 @@
+C:\Workspace\MAD-NPuzzle\NPuzzleGameServer\NPuzzleGameServer\NPuzzleGameServer\bin\Debug\NPuzzleGameServer.exe.config
+C:\Workspace\MAD-NPuzzle\NPuzzleGameServer\NPuzzleGameServer\NPuzzleGameServer\bin\Debug\NPuzzleGameServer.exe
+C:\Workspace\MAD-NPuzzle\NPuzzleGameServer\NPuzzleGameServer\NPuzzleGameServer\bin\Debug\NPuzzleGameServer.pdb
+C:\Workspace\MAD-NPuzzle\NPuzzleGameServer\NPuzzleGameServer\NPuzzleGameServer\obj\Debug\NPuzzleGameServer.csprojResolveAssemblyReference.cache
+C:\Workspace\MAD-NPuzzle\NPuzzleGameServer\NPuzzleGameServer\NPuzzleGameServer\obj\Debug\NPuzzleGameServer.exe
+C:\Workspace\MAD-NPuzzle\NPuzzleGameServer\NPuzzleGameServer\NPuzzleGameServer\obj\Debug\NPuzzleGameServer.pdb
+C:\Workspace\MAD-NPuzzle\NPuzzleGameServer\NPuzzleGameServer\NPuzzleGameServer\bin\Debug\websocket-sharp.dll
+C:\Workspace\MAD-NPuzzle\NPuzzleGameServer\NPuzzleGameServer\NPuzzleGameServer\bin\Debug\websocket-sharp.xml

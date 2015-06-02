@@ -47,7 +47,16 @@
         </activity>
         <activity
             android:name=".PlayerSelection"
-            android:label="@string/title_activity_player_selection" >
+            android:label="@string/title_activity_player_selection"
+            android:parentActivityName=".ModeSelection">
+        </activity>
+        <activity
+            android:name=".MultiplayerConnecting"
+            android:label="@string/title_activity_multiplayer_connecting"
+            android:parentActivityName=".ModeSelection">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="han.ica.projects.nPuzzle492724.ModeSelection" />
         </activity>
     </application>
 

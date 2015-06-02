@@ -7,12 +7,16 @@ import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 
-public class PlayerSelection extends ActionBarActivity {
-protected ListView lvPlayerSelection;
+public class PlayerSelection extends ActionBarActivity implements GameServerConnectionListener {
+	protected ListView lvPlayerSelection;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -20,15 +24,46 @@ protected ListView lvPlayerSelection;
 		setContentView(R.layout.activity_player_selection);
 		lvPlayerSelection = (ListView) findViewById(R.id.lvPlayerSelection);
 
-		List<String> playerArray = new ArrayList<String>();
-		playerArray.add("player1");
-		playerArray.add("player2");
+		GameServerConnection.getInstance().addListener(this);
 
-		ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
-			this,
-			android.R.layout.simple_list_item_1,
-			playerArray );
+		GameServerConnection.getInstance().requestPlayerList();
+	}
 
-		lvPlayerSelection.setAdapter(arrayAdapter);
+	@Override
+	public void onConnect() {}
+
+	@Override
+	public void onMessage(Message message) {
+		JSONArray data = (JSONArray)message.data;
+		ArrayList<String> playerList = new ArrayList<>();
+		try {
+			for(int i = 0; i < data.length(); i++){
+				String id = data.getJSONObject(i).getString("id");
+				String name = data.getJSONObject(i).getString("naam");
+				playerList.add(name);
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+
+		final ArrayList<String> players = playerList;
+		final PlayerSelection self = this;
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
+						self,
+						android.R.layout.simple_list_item_1,
+						players);
+
+				lvPlayerSelection.setAdapter(arrayAdapter);
+			}
+		});
+	}
+
+	@Override
+	public void onBackPressed() {
+		super.onBackPressed();
+		this.finish();
 	}
 }

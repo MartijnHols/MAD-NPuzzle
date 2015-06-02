@@ -47,4 +47,5 @@
         android:layout_centerHorizontal="true"
         android:hint="Gebruikersnaam"
         android:width="200dp"/>
+
 </RelativeLayout>

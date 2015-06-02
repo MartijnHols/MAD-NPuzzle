@@ -22,105 +22,59 @@ import org.java_websocket.drafts.Draft_17;
 import org.java_websocket.handshake.ServerHandshake;
 
 public class ImageSelection extends ActionBarActivity implements AdapterView.OnItemClickListener {
-	protected RadioButton rbEasy;
-	protected RadioButton rbMedium;
-	protected RadioButton rbHard;
+    protected RadioButton rbEasy;
+    protected RadioButton rbMedium;
+    protected RadioButton rbHard;
 
-	protected GridView gvImageSelection;
+    protected GridView gvImageSelection;
 
-	public static int IMAGE_SAMPLE_SIZE = 2;
+    public static int IMAGE_SAMPLE_SIZE = 2;
 
-	public int getDifficulty() {
-		if (rbEasy.isChecked()) {
-			return Game.DIFFICULTY_EASY;
-		} else if (rbMedium.isChecked()) {
-			return Game.DIFFICULTY_MEDIUM;
-		} else if (rbHard.isChecked()) {
-			return Game.DIFFICULTY_HARD;
-		}
-		return Game.DIFFICULTY_HARD;
-	}
-
-	private List<Image> getImages() {
-		List<Image> images = new ArrayList<Image>();
-		for (Field field : R.drawable.class.getFields()) {
-			if (field.getName().startsWith("puzzle_")) {
-				try {
-					Image image = new Image(this, field.getInt(null), IMAGE_SAMPLE_SIZE);
-					images.add(image);
-				} catch (Exception e) {
-				}
-			}
-		}
-		return images;
-	}
-
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_image_selection);
-
-		rbEasy = (RadioButton) findViewById(R.id.rbEasy);
-		rbMedium = (RadioButton) findViewById(R.id.rbMedium);
-		rbHard = (RadioButton) findViewById(R.id.rbHard);
-		gvImageSelection = (GridView) findViewById(R.id.gvImageSelection);
-
-		gvImageSelection.setAdapter(new ImageSelectionAdapter(this, getImages()));
-		gvImageSelection.setOnItemClickListener(this);
-        connectWebSocket();
-	}
-
-	@Override
-	public void onItemClick(AdapterView<?> parent, View v, int position, long resourceId) {
-		Intent i = new Intent(this, GamePlay.class);
-		i.putExtra("resourceId", (int) resourceId)
-			.putExtra("difficulty", getDifficulty());
-		startActivity(i);
-	}
-
-    private WebSocketClient mWebSocketClient;
-
-    private void connectWebSocket() {
-        URI uri;
-        try {
-            uri = new URI("ws://192.168.0.27:1337");
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-            return;
+    public int getDifficulty() {
+        if (rbEasy.isChecked()) {
+            return Game.DIFFICULTY_EASY;
+        } else if (rbMedium.isChecked()) {
+            return Game.DIFFICULTY_MEDIUM;
+        } else if (rbHard.isChecked()) {
+            return Game.DIFFICULTY_HARD;
         }
-
-        mWebSocketClient = new WebSocketClient(uri, new Draft_17()) {
-            @Override
-            public void onOpen(ServerHandshake serverHandshake) {
-                Log.i("Websocket", "Opened");
-//                mWebSocketClient.send("{\"command\":\"test\",\"data\":{\"location\": {lat:168.5621,long:200.1232131245}}}");
-                mWebSocketClient.send("{\"command\":\"register\",\"data\":{\"lat\": \"testlat\",\"lon\": \"testlon\"}}");
-            }
-
-            @Override
-            public void onMessage(String s) {
-                final String message = s;
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-//                        TextView textView = (TextView)findViewById(R.id.messages);
-//                        textView.setText(textView.getText() + "\n" + message);
-                        Log.d("kip", message);
-                    }
-                });
-            }
-
-            @Override
-            public void onClose(int i, String s, boolean b) {
-                Log.i("Websocket", "Closed " + s);
-            }
-
-            @Override
-            public void onError(Exception e) {
-                Log.i("Websocket", "Error " + e.getMessage());
-            }
-        };
-        mWebSocketClient.connect();
+        return Game.DIFFICULTY_HARD;
     }
 
+    private List<Image> getImages() {
+        List<Image> images = new ArrayList<Image>();
+        for (Field field : R.drawable.class.getFields()) {
+            if (field.getName().startsWith("puzzle_")) {
+                try {
+                    Image image = new Image(this, field.getInt(null), IMAGE_SAMPLE_SIZE);
+                    images.add(image);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return images;
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_image_selection);
+
+        rbEasy = (RadioButton) findViewById(R.id.rbEasy);
+        rbMedium = (RadioButton) findViewById(R.id.rbMedium);
+        rbHard = (RadioButton) findViewById(R.id.rbHard);
+        gvImageSelection = (GridView) findViewById(R.id.gvImageSelection);
+
+        gvImageSelection.setAdapter(new ImageSelectionAdapter(this, getImages()));
+        gvImageSelection.setOnItemClickListener(this);
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View v, int position, long resourceId) {
+        Intent i = new Intent(this, GamePlay.class);
+        i.putExtra("resourceId", (int) resourceId)
+                .putExtra("difficulty", getDifficulty());
+        startActivity(i);
+    }
 }

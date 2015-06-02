@@ -83,7 +83,7 @@ public class ImageSelection extends ActionBarActivity implements AdapterView.OnI
     private void connectWebSocket() {
         URI uri;
         try {
-            uri = new URI("ws://192.168.0.27:1337");
+            uri = new URI("ws://192.168.2.7:1337");
         } catch (URISyntaxException e) {
             e.printStackTrace();
             return;

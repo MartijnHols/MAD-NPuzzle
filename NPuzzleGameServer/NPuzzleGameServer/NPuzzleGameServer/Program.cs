@@ -23,8 +23,8 @@ namespace NPuzzleGameServer
     }
     public struct Location
     {
-        public string lat;
-        public string lon;
+        public double lat;
+        public double lon;
     }
 
     public class NPuzzleConnection : WebSocketBehavior
@@ -39,10 +39,17 @@ namespace NPuzzleGameServer
             switch (msg.command)
             {
                 case "register":
+                    name = msg.data.name;
                     location = new Location() {
                         lat = msg.data.lat,
                         lon = msg.data.lon
                     };
+                    
+                    Send(new Message()
+                    {
+                        command = "register_successful",
+                        data = null
+                    });
                     break;
                 case "getPlayers":
                     List<dynamic> players = new List<dynamic>();

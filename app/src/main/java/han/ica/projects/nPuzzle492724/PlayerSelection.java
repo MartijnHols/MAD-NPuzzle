@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -20,7 +21,6 @@ import java.util.List;
 
 public class PlayerSelection extends ActionBarActivity implements GameServerConnectionListener, AdapterView.OnItemClickListener {
 	protected ListView lvPlayerSelection;
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -30,6 +30,7 @@ public class PlayerSelection extends ActionBarActivity implements GameServerConn
 		GameServerConnection.getInstance().addListener(this);
 
 		GameServerConnection.getInstance().requestPlayerList();
+		lvPlayerSelection.setOnItemClickListener(this);
 	}
 
 
@@ -45,6 +46,7 @@ public class PlayerSelection extends ActionBarActivity implements GameServerConn
 			for(int i = 0; i < data.length(); i++){
 				String id = data.getJSONObject(i).getString("id");
 				String name = data.getJSONObject(i).getString("naam");
+				lvPlayerSelection.setTag(id);
 				playerList.add(name);
 			}
 		} catch (JSONException e) {
@@ -74,6 +76,8 @@ public class PlayerSelection extends ActionBarActivity implements GameServerConn
 
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-		Toast.makeText(this, ""+ id, Toast.LENGTH_LONG);
+		String clickedPlayerName = parent.getItemAtPosition(position).toString();
+		String clickedPlayerID = (String) parent.getTag();
+		GameServerConnection.getInstance().sendGameInvitation(clickedPlayerName, clickedPlayerID);
 	}
 }

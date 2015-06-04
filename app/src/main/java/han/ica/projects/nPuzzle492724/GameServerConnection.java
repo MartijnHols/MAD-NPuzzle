@@ -62,7 +62,7 @@ public class GameServerConnection {
 		if (isConnected()) {
 			return; // kan geen normale exception in java
 		}
-		String address = "ws://145.74.159.254:1337";
+		String address = "ws://145.74.158.201:1337";
 		Log.i("WebSocket", "Connecting to: " + address);
 		URI uri;
 		try {
@@ -140,6 +140,22 @@ public class GameServerConnection {
 
 	private void send(Message m) {
 		mWebSocketClient.send(m.toString());
+	}
+
+	public  void sendGameInvitation (String name, String id){
+		String sender = "sendername";
+		Message m = new Message("sendInvitation");
+		JSONObject data = new JSONObject();
+		try {
+			data.put("sender", sender);
+			data.put("name", name);
+			data.put("id", id);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		m.data = data;
+
+		send(m);
 	}
 
 	public void register(String name, double lat, double lon) {

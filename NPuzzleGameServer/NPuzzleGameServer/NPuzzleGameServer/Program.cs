@@ -51,6 +51,9 @@ namespace NPuzzleGameServer
                         data = null
                     });
                     break;
+                case "sendInvitation":
+                    var ID = msg.data.id;
+                    break;
                 case "getPlayers":
                     List<dynamic> players = new List<dynamic>();
                     foreach (var item in Sessions.Sessions)

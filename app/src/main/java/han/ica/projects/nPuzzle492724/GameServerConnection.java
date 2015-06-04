@@ -60,9 +60,9 @@ public class GameServerConnection {
 
 	public void connect() {
 		if (isConnected()) {
-			return; // hier wil ik een exception gooien maar Java is kut.
+			return; // kan geen normale exception in java
 		}
-		String address = "ws://192.168.2.7:1337";
+		String address = "ws://145.74.159.254:1337";
 		Log.i("WebSocket", "Connecting to: " + address);
 		URI uri;
 		try {

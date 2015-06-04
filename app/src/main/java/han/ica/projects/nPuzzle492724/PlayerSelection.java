@@ -4,8 +4,11 @@ import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -15,7 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 
 
-public class PlayerSelection extends ActionBarActivity implements GameServerConnectionListener {
+public class PlayerSelection extends ActionBarActivity implements GameServerConnectionListener, AdapterView.OnItemClickListener {
 	protected ListView lvPlayerSelection;
 
 	@Override
@@ -28,6 +31,8 @@ public class PlayerSelection extends ActionBarActivity implements GameServerConn
 
 		GameServerConnection.getInstance().requestPlayerList();
 	}
+
+
 
 	@Override
 	public void onConnect() {}
@@ -65,5 +70,10 @@ public class PlayerSelection extends ActionBarActivity implements GameServerConn
 	public void onBackPressed() {
 		super.onBackPressed();
 		this.finish();
+	}
+
+	@Override
+	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+		Toast.makeText(this, ""+ id, Toast.LENGTH_LONG);
 	}
 }

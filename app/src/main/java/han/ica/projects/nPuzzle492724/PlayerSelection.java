@@ -5,20 +5,28 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 
 import java.util.ArrayList;
-import java.util.Dictionary;
-import java.util.HashMap;
-import java.util.Map;
 
+class PlayerListItem {
+    public String naam;
+    public String id;
+    public int afstand;
+
+    public String getId() {
+        return id;
+    }
+}
 
 public class PlayerSelection extends ActionBarActivity implements GameServerConnectionListener, AdapterView.OnItemClickListener {
     protected ListView lvPlayerSelection;
@@ -43,43 +51,30 @@ public class PlayerSelection extends ActionBarActivity implements GameServerConn
     @Override
     public void onMessage(Message message) {
         JSONArray data = (JSONArray) message.data;
-
+        final PlayerSelection self = this;
         String command = message.command;
         switch (command) {
             case "players":
-                ArrayList<String> playerList = new ArrayList<>();
-                //ArrayList<String> playerIds = new ArrayList<>();
-                //Map<String, String> playerIds = new HashMap<String, String>();
+
+                ArrayList<PlayerListItem> playerList = new ArrayList<>();
                 try {
                     for (int i = 0; i < data.length(); i++) {
-                        String id = data.getJSONObject(i).getString("id");
-                        String name = data.getJSONObject(i).getString("naam");
-                        //playerIds.add(id);
-                        playerList.add(name);
+                        PlayerListItem pli = new PlayerListItem();
+                        pli.id = data.getJSONObject(i).getString("id");
+                        pli.naam = data.getJSONObject(i).getString("naam");
+                        playerList.add(pli);
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
 
-                final ArrayList<String> players = playerList;
-                final PlayerSelection self = this;
+                final ArrayList<PlayerListItem> players = playerList;
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
-                                self,
-                                android.R.layout.simple_list_item_1,
-                                players);
-
-                        lvPlayerSelection.setAdapter(arrayAdapter);
+                        lvPlayerSelection.setAdapter(new PlayerListAdapter(self, players));
                     }
                 });
-                /* for (int i = 0; i < lvPlayerSelection.getCount(); i++) {
-                    View v = lvPlayerSelection.getAdapter().getView(i, null, null);
-                    TextView tv = (TextView) v.findViewById(i);
-                    String playerid = playerIds.get(i).toString();
-                    tv.setTag(playerid);
-                }*/
                 break;
             case "invite":
                 try {
@@ -87,6 +82,14 @@ public class PlayerSelection extends ActionBarActivity implements GameServerConn
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
+                break;
+            case "playerUnavailable":
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(self, "This player is unavailable. Please refresh", Toast.LENGTH_LONG).show();
+                    }
+                });
                 break;
         }
 
@@ -100,37 +103,62 @@ public class PlayerSelection extends ActionBarActivity implements GameServerConn
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        String clickedPlayerName = parent.getItemAtPosition(position).toString();
-        String clickedPlayerID = (String) parent.getTag();
-        GameServerConnection.getInstance().sendGameInvitation(clickedPlayerName, clickedPlayerID);
+        String clickedPlayerID = (String) view.getTag();
+
+        GameServerConnection.getInstance().sendGameInvitation("harry", clickedPlayerID);
     }
 
     private void showInvitationDialog(final String sender) {
         final String senderName = sender;
         final PlayerSelection self = this;
         PlayerSelection.this.runOnUiThread(new Runnable() {
-               @Override
-               public void run() {
-                   new AlertDialog.Builder(self)
-                           .setTitle("Game invite")
-                           .setMessage(senderName + " is inviting you to play N-Puzzle! Accept?")
-                           .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                               public void onClick(DialogInterface dialog, int which) {
-                                   startMultiplayerGame();
-                               }
-                           })
-                           .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
-                               public void onClick(DialogInterface dialog, int which) {
-                                   // do nothing
-                               }
-                           })
-                           .show();
-               }
-           }
+                                               @Override
+                                               public void run() {
+                                                   new AlertDialog.Builder(self)
+                                                           .setTitle("Game invite")
+                                                           .setMessage(senderName + " is inviting you to play N-Puzzle! Accept?")
+                                                           .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                                                               public void onClick(DialogInterface dialog, int which) {
+                                                                   // do nothing
+                                                               }
+                                                           })
+                                                           .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                                               public void onClick(DialogInterface dialog, int which) {
+                                                                   startMultiplayerGame();
+                                                               }
+                                                           })
+                                                           .show();
+                                               }
+                                           }
         );
     }
-    private void startMultiplayerGame(){
+
+    private void startMultiplayerGame() {
         startActivity(new Intent(PlayerSelection.this, GamePlay.class));
         finish();
+    }
+
+    private void refreshPlayerList() {
+        GameServerConnection.getInstance().requestPlayerList();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_player_selection, menu);
+
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle presses on the action bar items
+        switch (item.getItemId()) {
+            case R.id.action_refresh:
+                refreshPlayerList();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 }

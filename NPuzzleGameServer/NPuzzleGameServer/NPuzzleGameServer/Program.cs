@@ -53,19 +53,39 @@ namespace NPuzzleGameServer
                     });
                     break;
                 case "sendInvitation":
-                    var ID = msg.data.id;
+                    var invitedPlayerID = msg.data.id;
                     List<dynamic> data = new List<dynamic>();
                     var sender = msg.data.sender;
                     var invitationInfo = new Dictionary<string, object>();
                     var sendername = this.name;
                     invitationInfo.Add("sender", msg.data.sender);
-                    
+
                     data.Add(invitationInfo);
-                    Sessions.SendTo(ID, Json.Encode(new Message()
+                    var match = false;
+                    foreach (var item in Sessions.Sessions)
                     {
-                        command = "invite",
+                        if (item.ID == invitedPlayerID)
+                        {
+                            match = true;
+                            break;
+                        }
+                    }
+                    if (match)
+                    {
+                        Sessions.SendTo(invitedPlayerID, Json.Encode(new Message()
+                        {
+                            command = "invite",
+                            data = data
+                        }));
+                    }
+                    else
+                    {
+                        Send(new Message()
+                    {
+                        command = "playerUnavailable",
                         data = data
-                    }));
+                    });
+                    }
 
                     break;
                 case "getPlayers":

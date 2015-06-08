@@ -61,7 +61,7 @@ public class GameServerConnection {
 
 	public void connect() {
 		if (isConnected()) {
-			return; // hier wil ik een exception gooien maar Java is kut.
+			return; // kan geen normale exception in java
 		}
 		String address = "ws://145.74.165.244:1337";
 		Log.i("WebSocket", "Connecting to: " + address);
@@ -141,6 +141,22 @@ public class GameServerConnection {
 
 	private void send(Message m) {
 		mWebSocketClient.send(m.toString());
+	}
+
+	public  void sendGameInvitation (String name, String id){
+		String sender = "sendername";
+		Message m = new Message("sendInvitation");
+		JSONObject data = new JSONObject();
+		try {
+			data.put("sender", sender);
+			data.put("name", name);
+			data.put("id", id);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		m.data = data;
+
+		send(m);
 	}
 
 	public void register(String name, Location location) {

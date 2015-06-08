@@ -15,7 +15,7 @@ namespace NPuzzleGameServer
     {
 
     }
-    
+
     public struct Message
     {
         public string command;
@@ -40,16 +40,33 @@ namespace NPuzzleGameServer
             {
                 case "register":
                     name = msg.data.name;
-                    location = new Location() {
+                    location = new Location()
+                    {
                         lat = msg.data.lat,
                         lon = msg.data.lon
                     };
-                    
+
                     Send(new Message()
                     {
                         command = "register_successful",
                         data = null
                     });
+                    break;
+                case "sendInvitation":
+                    var ID = msg.data.id;
+                    List<dynamic> data = new List<dynamic>();
+                    var sender = msg.data.sender;
+                    var invitationInfo = new Dictionary<string, object>();
+                    var sendername = this.name;
+                    invitationInfo.Add("sender", msg.data.sender);
+                    
+                    data.Add(invitationInfo);
+                    Sessions.SendTo(ID, Json.Encode(new Message()
+                    {
+                        command = "invite",
+                        data = data
+                    }));
+
                     break;
                 case "getPlayers":
                     List<dynamic> players = new List<dynamic>();
@@ -62,7 +79,7 @@ namespace NPuzzleGameServer
                         playerInfo.Add("location", con.location);
                         players.Add(playerInfo);
                     }
-                    
+
                     Send(new Message()
                     {
                         command = "players",

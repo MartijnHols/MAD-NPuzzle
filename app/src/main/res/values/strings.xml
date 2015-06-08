@@ -19,6 +19,7 @@
     <string name="singleplayer">Singleplayer</string>
     <string name="multiplayer">Multiplayer</string>
     <string name="title_activity_player_selection">PlayerSelection</string>
+    <string name="accept">Accept</string>
 
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>

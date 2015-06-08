@@ -1,5 +1,6 @@
 package han.ica.projects.nPuzzle492724;
 
+import android.location.Location;
 import android.util.Log;
 
 import org.java_websocket.client.WebSocketClient;
@@ -62,7 +63,7 @@ public class GameServerConnection {
 		if (isConnected()) {
 			return; // hier wil ik een exception gooien maar Java is kut.
 		}
-		String address = "ws://192.168.2.7:1337";
+		String address = "ws://145.74.165.244:1337";
 		Log.i("WebSocket", "Connecting to: " + address);
 		URI uri;
 		try {
@@ -142,13 +143,13 @@ public class GameServerConnection {
 		mWebSocketClient.send(m.toString());
 	}
 
-	public void register(String name, double lat, double lon) {
+	public void register(String name, Location location) {
 		Message m = new Message("register");
 		JSONObject data = new JSONObject();
 		try {
 			data.put("name", name);
-			data.put("lat", lat);
-			data.put("lon", lon);
+			data.put("lat", location.getLatitude());
+			data.put("lon", location.getLongitude());
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}

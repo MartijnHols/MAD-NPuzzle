@@ -1,33 +1,79 @@
 package han.ica.projects.nPuzzle492724;
 
 import android.content.Intent;
+import android.location.Criteria;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.widget.TextView;
 
+import java.util.Calendar;
 
-public class MultiplayerConnecting extends ActionBarActivity implements GameServerConnectionListener {
+
+public class MultiplayerConnecting extends ActionBarActivity implements GameServerConnectionListener, LocationListener {
 	private TextView txtConnectStatus;
+	private LocationManager locationManager;
+
+	private Location location = null;
+
+	public static int MAX_LOCATION_AGE = 10 * 60 * 1000;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_multiplayer_connecting);
 
-		txtConnectStatus = (TextView)findViewById(R.id.txtConnectStatus);
+		txtConnectStatus = (TextView) findViewById(R.id.txtConnectStatus);
 
 		GameServerConnection con = GameServerConnection.getInstance();
 		if (con.isConnected()) {
-			goToPlayerSelection();
+			Log.i("MultiplayerConnection", "Already connected, waiting for location...");
+			txtConnectStatus.setText("Already connected, waiting for location...");
+			isConnected = true;
+			loadProgress();
 		} else {
+			Log.i("MultiplayerConnection", "Connecting...");
+			txtConnectStatus.setText("Connecting...");
 			con.addListener(this);
-			Log.i("MultiplayerConnection", "Connecting..");
 			con.connect();
 		}
+
+		locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+
+		// Source: http://stackoverflow.com/a/10524443/684353
+		Location lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+		if (lastKnownLocation != null && lastKnownLocation.getTime() > Calendar.getInstance().getTimeInMillis() - MAX_LOCATION_AGE) {
+			Log.i("MultiplayerConnection", "Already known location: " + location.getLatitude() + " and " + location.getLongitude());
+			txtConnectStatus.setText("Location received, waiting for connection...");
+			location = lastKnownLocation;
+			loadProgress();
+		} else {
+			Log.i("MultiplayerConnection", "Requesting location updates...");
+			locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
+			locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
+		}
 	}
+
+	/*//Source: http://stackoverflow.com/a/15893406/684353
+	public static double distFrom(
+    double lat1, double lng1, double lat2, double lng2)
+{
+    double earthRadius = 3958.75;
+    double dLat = Math.toRadians(lat2-lat1);
+    double dLng = Math.toRadians(lng2-lng1);
+    double a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+        Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
+        Math.sin(dLng/2) * Math.sin(dLng/2);
+    double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    double dist = earthRadius * c;
+
+    return dist;
+} */
+
+	private boolean isConnected = false;
 
 	@Override
 	public void onConnect() {
@@ -38,8 +84,58 @@ public class MultiplayerConnecting extends ActionBarActivity implements GameServ
 				txtConnectStatus.setText("Connected!");
 			}
 		});
-		GameServerConnection.getInstance().register(getIntent().getStringExtra("name"), 0, 0);
+
+		isConnected = true;
+		loadProgress();
 	}
+	@Override
+	public void onLocationChanged(final Location location) {
+		Log.i("MultiplayerConnection", "onLocationChanged");
+		if (location != null) {
+			Log.i("MultiplayerConnection", "Location Changed: " + location.getLatitude() + " and " + location.getLongitude());
+			runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					txtConnectStatus.setText("Location received, waiting for connection...");
+				}
+			});
+			locationManager.removeUpdates(this);
+
+			this.location = location;
+			loadProgress();
+		} else {
+			Log.e("MultiplayerConnection", "Error! No location received :(");
+		}
+	}
+	@Override
+	public void onStatusChanged(String provider, int status, Bundle extras) {
+		Log.i("MultiplayerConnection", "onStatusChanged");
+	}
+	@Override
+	public void onProviderEnabled(String provider) {
+		Log.i("MultiplayerConnection", "onProviderEnabled");
+	}
+	@Override
+	public void onProviderDisabled(String provider) {
+		Log.i("MultiplayerConnection", "onProviderDisabled");
+	}
+
+	public void loadProgress() {
+		if (isConnected && location != null) {
+			GameServerConnection.getInstance().register(getIntent().getStringExtra("name"), location);
+		}
+	}
+
+	class LatLng {
+		double lat;
+		double lon;
+
+		public LatLng(double lat, double lon) {
+			this.lat = lat;
+			this.lon = lon;
+		}
+	}
+
 	@Override
 	public void onMessage(Message message) {
 		Log.i("MultiplayerConnection", message.command);

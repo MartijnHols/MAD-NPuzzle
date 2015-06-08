@@ -1,5 +1,6 @@
 package han.ica.projects.nPuzzle492724;
 
+import android.location.Location;
 import android.util.Log;
 
 import org.java_websocket.client.WebSocketClient;
@@ -158,13 +159,13 @@ public class GameServerConnection {
 		send(m);
 	}
 
-	public void register(String name, double lat, double lon) {
+	public void register(String name, Location location) {
 		Message m = new Message("register");
 		JSONObject data = new JSONObject();
 		try {
 			data.put("name", name);
-			data.put("lat", lat);
-			data.put("lon", lon);
+			data.put("lat", location.getLatitude());
+			data.put("lon", location.getLongitude());
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}

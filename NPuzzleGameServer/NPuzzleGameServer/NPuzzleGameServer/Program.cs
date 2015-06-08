@@ -42,8 +42,8 @@ namespace NPuzzleGameServer
                     name = msg.data.name;
                     location = new Location()
                     {
-                        lat = msg.data.lat,
-                        lon = msg.data.lon
+                        lat = (double)msg.data.lat,
+                        lon = (double)msg.data.lon
                     };
 
                     Send(new Message()

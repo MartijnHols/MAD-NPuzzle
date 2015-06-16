@@ -165,6 +165,31 @@ public class PlayerSelection extends ActionBarActivity implements GameServerConn
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 		PlayerListItem pli = (PlayerListItem) view.getTag();
 		GameServerConnection.getInstance().sendGameInvitation(pli.id);
+		showPlayerInvitedDialog();
+	}
+
+	private void showPlayerInvitedDialog(){
+		final PlayerSelection self = this;
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				new AlertDialog.Builder(self)
+					.setTitle("Invite sent")
+					.setMessage("Waiting for response...")
+					.setCancelable(true)
+					.setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int which) {
+						// do nothing
+					}
+				})
+//					.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+//						public void onClick(DialogInterface dialog, int which) {
+//							sendAccept(senderID);
+//						}
+//					})
+					.show();
+			}
+		});
 	}
 
 	private void showInvitationDialog(final String ID, final String sender) {

@@ -59,6 +59,7 @@ namespace NPuzzleGameServer
                     var invitationInfo = new Dictionary<string, object>();
                     var sendername = this.name;
                     invitationInfo.Add("sender", msg.data.sender);
+                    invitationInfo.Add("sendername", sendername);
 
                     data.Add(invitationInfo);
                     var match = false;

@@ -21,7 +21,6 @@ interface GameServerConnectionListener {
 	public void onMessage(Message message);
 	public void onConnect();
 }
-
 class Message {
 	public String command;
 	public Object data;
@@ -63,7 +62,7 @@ public class GameServerConnection {
 		if (isConnected()) {
 			return; // kan geen normale exception in java
 		}
-		String address = "ws://145.74.159.152:1337";
+		String address = "ws://192.168.0.116:1337";
 		Log.i("WebSocket", "Connecting to: " + address);
 		URI uri;
 		try {
@@ -144,11 +143,9 @@ public class GameServerConnection {
 	}
 
 	public  void sendGameInvitation (String name, String id){
-		String sender = "sendername";
 		Message m = new Message("sendInvitation");
 		JSONObject data = new JSONObject();
 		try {
-			data.put("sender", sender);
 			data.put("name", name);
 			data.put("id", id);
 		} catch (JSONException e) {

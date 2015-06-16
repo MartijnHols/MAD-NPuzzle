@@ -78,7 +78,7 @@ public class PlayerSelection extends ActionBarActivity implements GameServerConn
                 break;
             case "invite":
                 try {
-                    showInvitationDialog(data.getJSONObject(0).getString("sender"));
+                    showInvitationDialog(data.getJSONObject(0).getString("sendername"));
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -134,7 +134,8 @@ public class PlayerSelection extends ActionBarActivity implements GameServerConn
     }
 
     private void startMultiplayerGame() {
-        startActivity(new Intent(PlayerSelection.this, GamePlay.class));
+        Intent i = new Intent(this, ImageSelection.class);
+        startActivity(i);
         finish();
     }
 

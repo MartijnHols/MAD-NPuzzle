@@ -168,7 +168,7 @@ public class PlayerSelection extends ActionBarActivity implements GameServerConn
 		showPlayerInvitedDialog();
 	}
 
-	private void showPlayerInvitedDialog(){
+	private void showPlayerInvitedDialog() {
 		final PlayerSelection self = this;
 		runOnUiThread(new Runnable() {
 			@Override
@@ -178,15 +178,10 @@ public class PlayerSelection extends ActionBarActivity implements GameServerConn
 					.setMessage("Waiting for response...")
 					.setCancelable(true)
 					.setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int which) {
-						// do nothing
-					}
-				})
-//					.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-//						public void onClick(DialogInterface dialog, int which) {
-//							sendAccept(senderID);
-//						}
-//					})
+						public void onClick(DialogInterface dialog, int which) {
+							// do nothing
+						}
+					})
 					.show();
 			}
 		});

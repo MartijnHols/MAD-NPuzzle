@@ -33,6 +33,8 @@ public class GamePlay extends ActionBarActivity implements AdapterView.OnItemCli
 
 	private Toast toast;
 
+	private String versusPlayerId;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -43,7 +45,8 @@ public class GamePlay extends ActionBarActivity implements AdapterView.OnItemCli
         game = new Game();
         game.imageResourceId = i.getIntExtra("resourceId", 0);
         game.difficulty = i.getIntExtra("difficulty", 1);
-        
+		versusPlayerId = i.getStringExtra("versusPlayerId");
+
 		image = new Image(this, game.imageResourceId);
 		gvPuzzle = (GridView) findViewById(R.id.gvPuzzle);
         vRectangle = (View) findViewById(R.id.vRectangle);

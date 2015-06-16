@@ -63,8 +63,8 @@ public class PlayerSelection extends ActionBarActivity implements GameServerConn
 		double dLat = Math.toRadians(lat2 - lat1);
 		double dLng = Math.toRadians(lng2 - lng1);
 		double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-			Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
-				Math.sin(dLng / 2) * Math.sin(dLng / 2);
+				Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
+						Math.sin(dLng / 2) * Math.sin(dLng / 2);
 		double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 		double dist = earthRadius * c;
 
@@ -92,67 +92,124 @@ public class PlayerSelection extends ActionBarActivity implements GameServerConn
 
 	@Override
 	public void onMessage(Message message) {
-		JSONArray data = (JSONArray) message.data;
-		final PlayerSelection self = this;
 		String command = message.command;
 		switch (command) {
 			case "players":
-				ArrayList<PlayerListItem> playerList = new ArrayList<>();
-				try {
-					for (int i = 0; i < data.length(); i++) {
-						PlayerListItem pli = new PlayerListItem();
-						pli.id = data.getJSONObject(i).getString("id");
-						pli.naam = data.getJSONObject(i).getString("naam");
-						JSONObject playerLoc = data.getJSONObject(i).getJSONObject("location");
-						pli.afstand = distFrom(location.getLatitude(), location.getLongitude(), playerLoc.getDouble("lat"), playerLoc.getDouble("lon"));
-						pli.stad = getCityName(playerLoc.getDouble("lat"), playerLoc.getDouble("lon"));
-						Log.i("PlayerSelection", "Afstand tot " + pli.naam + ": " + pli.afstand + "(" + pli.stad + ")");
-						playerList.add(pli);
-					}
-				} catch (JSONException e) {
-					e.printStackTrace();
-				}
-
-				Collections.sort(playerList, new Comparator<PlayerListItem>() {
-					@Override
-					public int compare(PlayerListItem o1, PlayerListItem o2) {
-						if (o1.afstand > o2.afstand) {
-							return 1;
-						} else if (o1.afstand < o2.afstand) {
-							return -1;
-						} else {
-							return 0;
-						}
-					}
-				});
-
-				final ArrayList<PlayerListItem> players = playerList;
-				runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
-						lvPlayerSelection.setAdapter(new PlayerListAdapter(self, players));
-					}
-				});
+				onPlayersReceived((JSONArray) message.data);
 				break;
-			case "inviteAccept":
-				startMultiplayerGame();
+			case "inviteReceived":
+				// Ik wordt uigenodigd door iemand anders
+				onInviteReceived((JSONObject) message.data);
 				break;
-			case "invite":
-				try {
-					showInvitationDialog(data.getJSONObject(0).getString("senderID"), data.getJSONObject(0).getString("sendername"));
-				} catch (JSONException e) {
-					e.printStackTrace();
+			case "inviteAccepted":
+				// Mijn uitnodiging aan iemand anders is geaccepteerd
+				{
+					JSONObject data = (JSONObject) message.data;
+					String playerId = null;
+					try {
+						playerId = data.getString("invitedPlayerId");
+					} catch (JSONException e) {
+						e.printStackTrace();
+					}
+
+					onInviteAccepted(playerId);
 				}
+				break;
+			case "inviteAcceptedSuccessful":
+				// Ik heb een invite geaccepteerd en dat ging goed
+				onInviteAcceptedSuccessful();
 				break;
 			case "playerUnavailable":
-				runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
-						Toast.makeText(self, "This player is unavailable. Please refresh", Toast.LENGTH_LONG).show();
-					}
-				});
+				onInvitePlayerUnavailable();
 				break;
 		}
+	}
+
+	private void onInviteReceived(JSONObject data) {
+		try {
+			final String senderName = data.getString("sendername");
+			final String senderID = data.getString("senderID");
+			final PlayerSelection self = this;
+			runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					new AlertDialog.Builder(self)
+							.setTitle("Game invite")
+							.setMessage(senderName + " is inviting you to play N-Puzzle! Accept?")
+							.setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+								public void onClick(DialogInterface dialog, int which) {
+									// do nothing
+								}
+							})
+							.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+								public void onClick(DialogInterface dialog, int which) {
+									sendAccept(senderID);
+								}
+							})
+							.show();
+				}
+			});
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+	}
+	private void onInvitePlayerUnavailable() {
+		final PlayerSelection self = this;
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				Toast.makeText(self, "This player is unavailable. Please refresh.", Toast.LENGTH_LONG).show();
+			}
+		});
+	}
+	private void onInviteAccepted(String playerId) {
+		Intent i = new Intent(this, ImageSelection.class);
+		i.putExtra("versusPlayerId", playerId);
+		startActivity(i);
+	}
+	private void onInviteAcceptedSuccessful() {
+		Intent i = new Intent(this, MultiplayerWaitingForGameStart.class);
+		startActivity(i);
+	}
+
+	private void onPlayersReceived(JSONArray data) {
+		ArrayList<PlayerListItem> playerList = new ArrayList<>();
+		try {
+			for (int i = 0; i < data.length(); i++) {
+				PlayerListItem pli = new PlayerListItem();
+				pli.id = data.getJSONObject(i).getString("id");
+				pli.naam = data.getJSONObject(i).getString("naam");
+				JSONObject playerLoc = data.getJSONObject(i).getJSONObject("location");
+				pli.afstand = distFrom(location.getLatitude(), location.getLongitude(), playerLoc.getDouble("lat"), playerLoc.getDouble("lon"));
+				pli.stad = getCityName(playerLoc.getDouble("lat"), playerLoc.getDouble("lon"));
+				Log.i("PlayerSelection", "Afstand tot " + pli.naam + ": " + pli.afstand + "(" + pli.stad + ")");
+				playerList.add(pli);
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+
+		Collections.sort(playerList, new Comparator<PlayerListItem>() {
+			@Override
+			public int compare(PlayerListItem o1, PlayerListItem o2) {
+				if (o1.afstand > o2.afstand) {
+					return 1;
+				} else if (o1.afstand < o2.afstand) {
+					return -1;
+				} else {
+					return 0;
+				}
+			}
+		});
+
+		final PlayerSelection self = this;
+		final ArrayList<PlayerListItem> players = playerList;
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				lvPlayerSelection.setAdapter(new PlayerListAdapter(self, players));
+			}
+		});
 	}
 
 	@Override
@@ -164,43 +221,11 @@ public class PlayerSelection extends ActionBarActivity implements GameServerConn
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 		PlayerListItem pli = (PlayerListItem) view.getTag();
-		GameServerConnection.getInstance().sendGameInvitation(pli.id);
-	}
-
-	private void showInvitationDialog(final String ID, final String sender) {
-		final String senderName = sender;
-		final String senderID = ID;
-		final PlayerSelection self = this;
-		runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				new AlertDialog.Builder(self)
-					.setTitle("Game invite")
-					.setMessage(senderName + " is inviting you to play N-Puzzle! Accept?")
-					.setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog, int which) {
-							// do nothing
-						}
-					})
-					.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog, int which) {
-							sendAccept(senderID);
-						}
-					})
-					.show();
-			}
-		});
-	}
-
-	private void startMultiplayerGame() {
-		Intent i = new Intent(this, ImageSelection.class);
-		i.putExtra("multiplayer", true);
-		startActivity(i);
-		finish();
+		GameServerConnection.getInstance().sendInvite(pli.id);
 	}
 
 	private void sendAccept(String senderID) {
-		GameServerConnection.getInstance().startMultiplayerGame(senderID);
+		GameServerConnection.getInstance().acceptInvite(senderID);
 	}
 
 	private void refreshPlayerList() {

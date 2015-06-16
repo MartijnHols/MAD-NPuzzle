@@ -40,111 +40,155 @@ namespace NPuzzleGameServer
             switch (msg.command)
             {
                 case "register":
-                    name = msg.data.name;
-                    location = new Location()
-                    {
-                        lat = (double)msg.data.lat,
-                        lon = (double)msg.data.lon
-                    };
-
-                    Send(new Message()
-                    {
-                        command = "register_successful",
-                        data = null
-                    });
+                    // De speler meldt zichzelf aan op de opgegeven locatie
+                    register(msg.data.name, (double)msg.data.lat, (double)msg.data.lon);
                     break;
-                case "sendInvitation":
-                    var invitedPlayerID = msg.data.id;
-                    var senderID = this.ID;
-                    List<dynamic> data = new List<dynamic>();
-                    var sender = msg.data.sender;
-                    var invitationInfo = new Dictionary<string, object>();
-                    var sendername = this.name;
-                    invitationInfo.Add("sender", msg.data.sender);
-                    invitationInfo.Add("sendername", sendername);
-                    invitationInfo.Add("senderID", senderID);
-
-                    data.Add(invitationInfo);
-                    var match = false;
-                    foreach (var item in Sessions.Sessions)
-                    {
-                        if (item.ID == invitedPlayerID)
-                        {
-                            match = true;
-                            break;
-                        }
-                    }
-                    if (match)
-                    {
-                        Sessions.SendTo(invitedPlayerID, Json.Encode(new Message()
-                        {
-                            command = "invite",
-                            data = data
-                        }));
-                    }
-                    else
-                    {
-                        Send(new Message()
-                    {
-                        command = "playerUnavailable",
-                        data = data
-                    });
-                    }
-
+                case "sendInvite":
+                    // De speler stuurt een invite naar het opgegeven id
+                    sendInvite(msg.data.playerId);
                     break;
                 case "invitationAccept":
-                    senderID = msg.data.id;
-                    invitedPlayerID = this.ID;
-                    List<dynamic> info = new List<dynamic>();
-                    var acceptInfo = new Dictionary<string, object>();
-
-                    acceptInfo.Add("senderID", senderID);
-                    acceptInfo.Add("invitedPlayerID", invitedPlayerID);
-
-                    foreach (var item in Sessions.Sessions)
-                    {
-                        var con = (NPuzzleConnection)item;
-                        if ((con.ID == senderID) || (con.ID == invitedPlayerID))
-                        {
-                            con.inGame = true;
-                        }
-                    }
-
-                    info.Add(acceptInfo);
-                    Sessions.SendTo(invitedPlayerID, Json.Encode(new Message()
-                        {
-                            command = "inviteAccept",
-                            data = info
-                        }));
-                    Sessions.SendTo(senderID, Json.Encode(new Message()
-                        {
-                            command = "inviteAccept",
-                            data = info
-                        }));
+                    // De speler accepteerd een ontvangen invite
+                    acceptInvite(msg.data.id);
                     break;
                 case "getPlayers":
-                    List<dynamic> players = new List<dynamic>();
-                    foreach (var item in Sessions.Sessions)
-                    {
-                        var con = (NPuzzleConnection)item;
-                        if (con.name != null && !con.inGame)
-                        {
-                            var playerInfo = new Dictionary<string, object>();
-                            playerInfo.Add("id", con.ID);
-                            playerInfo.Add("naam", con.name);
-                            playerInfo.Add("location", con.location);
-                            players.Add(playerInfo);
-                        }
-                    }
-
-                    Send(new Message()
-                    {
-                        command = "players",
-                        data = players
-                    });
+                    // De speler vraagt een lijst met spelers op
+                    getPlayers();
+                    break;
+                case "startGame":
+                    // De speler heeft een afbeelding en moeilijkheisgraad gekozen en de game moet starten
+                    startGame(msg.data.invitedPlayerId, msg.data.resourceId, msg.data.difficulty);
                     break;
                 default:
                     throw new Exception("Invalid command: " + msg.command);
+            }
+        }
+
+        private void register(string name, double lat, double lng)
+        {
+            this.name = name;
+            location = new Location()
+            {
+                lat = lat,
+                lon = lng
+            };
+
+            Send(new Message()
+            {
+                command = "register_successful",
+                data = null
+            });
+        }
+
+        private void sendInvite(string toPlayerId)
+        {
+            var data = new Dictionary<string, object>();
+            var sendername = this.name;
+            data.Add("sendername", sendername);
+            data.Add("senderID", this.ID);
+
+            var match = false;
+            foreach (var item in Sessions.Sessions)
+            {
+                if (item.ID == toPlayerId)
+                {
+                    match = true;
+                    break;
+                }
+            }
+            if (match)
+            {
+                Sessions.SendTo(toPlayerId, Json.Encode(new Message()
+                {
+                    command = "inviteReceived",
+                    data = data
+                }));
+            }
+            else
+            {
+                Send(new Message()
+                {
+                    command = "playerUnavailable",
+                    data = data
+                });
+            }
+        }
+
+        private void getPlayers()
+        {
+            List<dynamic> players = new List<dynamic>();
+            foreach (var item in Sessions.Sessions)
+            {
+                var con = (NPuzzleConnection)item;
+                if (con.name != null && !con.inGame)
+                {
+                    var playerInfo = new Dictionary<string, object>();
+                    playerInfo.Add("id", con.ID);
+                    playerInfo.Add("naam", con.name);
+                    playerInfo.Add("location", con.location);
+                    players.Add(playerInfo);
+                }
+            }
+
+            Send(new Message()
+            {
+                command = "players",
+                data = players
+            });
+        }
+
+        private void acceptInvite(string inviterId)
+        {
+            var data = new Dictionary<string, object>();
+            data["senderId"] = inviterId;
+            data["invitedPlayerId"] = this.ID;
+
+            Sessions.SendTo(inviterId, Json.Encode(new Message()
+            {
+                command = "inviteAccepted",
+                data = data
+            }));
+            Sessions.SendTo(this.ID, Json.Encode(new Message()
+            {
+                command = "inviteAcceptedSuccessful",
+                data = data
+            }));
+
+            foreach (var item in Sessions.Sessions)
+            {
+                var con = (NPuzzleConnection)item;
+                if ((con.ID == inviterId) || (con.ID == this.ID))
+                {
+                    con.inGame = true;
+                }
+            }
+        }
+
+        public void startGame(string invitedPlayerId, long resourceId, int difficulty)
+        {
+            {
+                var data = new Dictionary<string, object>();
+                data["otherPlayerId"] = this.ID;
+                data["resourceId"] = resourceId;
+                data["difficulty"] = difficulty;
+
+                Sessions.SendTo(invitedPlayerId, Json.Encode(new Message()
+                {
+                    command = "startGame",
+                    data = data
+                }));
+            }
+            {
+                var data = new Dictionary<string, object>();
+                data["otherPlayerId"] = invitedPlayerId;
+                data["resourceId"] = resourceId;
+                data["difficulty"] = difficulty;
+
+                Sessions.SendTo(this.ID, Json.Encode(new Message()
+                {
+                    command = "startGame",
+                    data = data
+                }));
             }
         }
 

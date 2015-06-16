@@ -56,6 +56,8 @@ public class ImageSelection extends ActionBarActivity implements AdapterView.OnI
         return images;
     }
 
+    private String versusPlayerId;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,13 +70,19 @@ public class ImageSelection extends ActionBarActivity implements AdapterView.OnI
 
         gvImageSelection.setAdapter(new ImageSelectionAdapter(this, getImages()));
         gvImageSelection.setOnItemClickListener(this);
+
+		versusPlayerId = getIntent().getStringExtra("versusPlayerId");
     }
 
     @Override
     public void onItemClick(AdapterView<?> parent, View v, int position, long resourceId) {
-        Intent i = new Intent(this, GamePlay.class);
-        i.putExtra("resourceId", (int) resourceId)
-                .putExtra("difficulty", getDifficulty());
-        startActivity(i);
+        if (versusPlayerId != null) {
+            GameServerConnection.getInstance().startGame(versusPlayerId, resourceId, getDifficulty());
+        } else {
+			Intent i = new Intent(this, GamePlay.class);
+			i.putExtra("resourceId", (int) resourceId)
+					.putExtra("difficulty", getDifficulty());
+			startActivity(i);
+		}
     }
 }

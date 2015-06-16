@@ -62,7 +62,7 @@ public class GameServerConnection {
 		if (isConnected()) {
 			return; // kan geen normale exception in java
 		}
-		String address = "ws://192.168.0.116:1337";
+		String address = "ws://192.168.0.117:1337";
 		Log.i("WebSocket", "Connecting to: " + address);
 		URI uri;
 		try {
@@ -142,11 +142,11 @@ public class GameServerConnection {
 		mWebSocketClient.send(m.toString());
 	}
 
-	public void startMultiplayerGame(String senderID){
+	public void acceptInvite(String inviterId){
 		Message m = new Message("invitationAccept");
 		JSONObject data = new JSONObject();
 		try {
-			data.put("id", senderID);
+			data.put("id", inviterId);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
@@ -155,11 +155,26 @@ public class GameServerConnection {
 		send(m);
 	}
 
-	public  void sendGameInvitation (String id){
-		Message m = new Message("sendInvitation");
+	public void startGame(String invitedPlayerId, long resourceId, int difficulty) {
+		Message m = new Message("startGame");
 		JSONObject data = new JSONObject();
 		try {
-			data.put("id", id);
+			data.put("invitedPlayerId", invitedPlayerId);
+			data.put("resourceId", resourceId);
+			data.put("difficulty", difficulty);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		m.data = data;
+
+		send(m);
+	}
+
+	public void sendInvite(String playerId){
+		Message m = new Message("sendInvite");
+		JSONObject data = new JSONObject();
+		try {
+			data.put("playerId", playerId);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}

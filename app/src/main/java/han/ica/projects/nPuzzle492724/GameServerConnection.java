@@ -21,7 +21,6 @@ interface GameServerConnectionListener {
 	public void onMessage(Message message);
 	public void onConnect();
 }
-
 class Message {
 	public String command;
 	public Object data;
@@ -144,11 +143,9 @@ public class GameServerConnection {
 	}
 
 	public  void sendGameInvitation (String name, String id){
-		String sender = "sendername";
 		Message m = new Message("sendInvitation");
 		JSONObject data = new JSONObject();
 		try {
-			data.put("sender", sender);
 			data.put("name", name);
 			data.put("id", id);
 		} catch (JSONException e) {

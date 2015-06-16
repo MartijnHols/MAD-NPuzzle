@@ -137,7 +137,7 @@ public class PlayerSelection extends ActionBarActivity implements GameServerConn
                 });
                 break;
             case "inviteAccept":
-                start();
+                startMultiplayerGame();
                 break;
             case "invite":
                 try {
@@ -167,7 +167,7 @@ public class PlayerSelection extends ActionBarActivity implements GameServerConn
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         String clickedPlayerID = (String) view.getTag();
 
-        GameServerConnection.getInstance().sendGameInvitation("harry", clickedPlayerID);
+        GameServerConnection.getInstance().sendGameInvitation(clickedPlayerID);
     }
 
     private void showInvitationDialog(final String ID, final String sender) {
@@ -187,7 +187,7 @@ public class PlayerSelection extends ActionBarActivity implements GameServerConn
                                                            })
                                                            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                                                                public void onClick(DialogInterface dialog, int which) {
-                                                                   startMultiplayerGame(senderID);
+                                                                   sendAccept(senderID);
                                                                }
                                                            })
                                                            .show();
@@ -196,12 +196,13 @@ public class PlayerSelection extends ActionBarActivity implements GameServerConn
         );
     }
 
-    private void start(){
+    private void startMultiplayerGame(){
         Intent i = new Intent(this, ImageSelection.class);
+        i.putExtra("multiplayer", true);
         startActivity(i);
         finish();
     }
-    private void startMultiplayerGame(String senderID) {
+    private void sendAccept(String senderID) {
         GameServerConnection.getInstance().startMultiplayerGame(senderID);
 
     }

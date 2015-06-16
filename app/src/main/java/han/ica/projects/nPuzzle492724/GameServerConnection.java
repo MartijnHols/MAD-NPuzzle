@@ -155,17 +155,15 @@ public class GameServerConnection {
 		send(m);
 	}
 
-	public  void sendGameInvitation (String name, String id){
+	public  void sendGameInvitation (String id){
 		Message m = new Message("sendInvitation");
 		JSONObject data = new JSONObject();
 		try {
-			data.put("name", name);
 			data.put("id", id);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
 		m.data = data;
-
 		send(m);
 	}
 

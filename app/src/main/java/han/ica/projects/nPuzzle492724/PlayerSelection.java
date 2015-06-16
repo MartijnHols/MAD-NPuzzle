@@ -63,8 +63,8 @@ public class PlayerSelection extends ActionBarActivity implements GameServerConn
 		double dLat = Math.toRadians(lat2 - lat1);
 		double dLng = Math.toRadians(lng2 - lng1);
 		double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-				Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
-						Math.sin(dLng / 2) * Math.sin(dLng / 2);
+			Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
+				Math.sin(dLng / 2) * Math.sin(dLng / 2);
 		double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 		double dist = earthRadius * c;
 
@@ -135,7 +135,7 @@ public class PlayerSelection extends ActionBarActivity implements GameServerConn
 				});
 				break;
 			case "inviteAccept":
-				start();
+				startMultiplayerGame();
 				break;
 			case "invite":
 				try {
@@ -164,8 +164,7 @@ public class PlayerSelection extends ActionBarActivity implements GameServerConn
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 		PlayerListItem pli = (PlayerListItem) view.getTag();
-
-		GameServerConnection.getInstance().sendGameInvitation("harry", pli.id);
+		GameServerConnection.getInstance().sendGameInvitation(pli.id);
 	}
 
 	private void showInvitationDialog(final String ID, final String sender) {
@@ -176,32 +175,32 @@ public class PlayerSelection extends ActionBarActivity implements GameServerConn
 			@Override
 			public void run() {
 				new AlertDialog.Builder(self)
-						.setTitle("Game invite")
-						.setMessage(senderName + " is inviting you to play N-Puzzle! Accept?")
-						.setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int which) {
-								// do nothing
-							}
-						})
-						.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int which) {
-								startMultiplayerGame(senderID);
-							}
-						})
-						.show();
+					.setTitle("Game invite")
+					.setMessage(senderName + " is inviting you to play N-Puzzle! Accept?")
+					.setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int which) {
+							// do nothing
+						}
+					})
+					.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int which) {
+							sendAccept(senderID);
+						}
+					})
+					.show();
 			}
 		});
 	}
 
-	private void start() {
+	private void startMultiplayerGame() {
 		Intent i = new Intent(this, ImageSelection.class);
+		i.putExtra("multiplayer", true);
 		startActivity(i);
 		finish();
 	}
 
-	private void startMultiplayerGame(String senderID) {
+	private void sendAccept(String senderID) {
 		GameServerConnection.getInstance().startMultiplayerGame(senderID);
-
 	}
 
 	private void refreshPlayerList() {

@@ -1,6 +1,8 @@
 package han.ica.projects.nPuzzle492724;
 
 import android.util.JsonReader;
+import android.util.Log;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -22,6 +24,9 @@ public class Game {
     public int difficulty;
     public int imageResourceId;
     public int numMoves;
+
+
+    public List rowsCompleted = new ArrayList();
     /**
      * De posities van de tiles zoals dat wordt weergegeven (1 tot difficulty + 1).
      */
@@ -87,6 +92,29 @@ public class Game {
         tilePositions[emptyTilePosition] = tilePositions[position];
         tilePositions[position] = emptyTileNumber;
         emptyTilePosition = position;
+    }
+
+    public List<Integer> completedRows = new ArrayList<Integer>();
+
+    public List getCompletedRows(){
+        for (int rij = 0; rij < getRows(); rij++) {
+            if (isRowComplete(rij)) {
+                rowsCompleted.add(rij);
+            }
+        }
+        return rowsCompleted;
+    }
+
+    private boolean isRowComplete(int rij) {
+        int columns = getRows();
+        int rows = columns;
+        for (int kolom = 0; kolom < columns; kolom++) {
+			int currentTileInLoop = (rows * rij) + kolom;
+			if (tilePositions[currentTileInLoop] != currentTileInLoop){
+				return false;
+			}
+		}
+        return true;
     }
 
     public int getRandomMove() {

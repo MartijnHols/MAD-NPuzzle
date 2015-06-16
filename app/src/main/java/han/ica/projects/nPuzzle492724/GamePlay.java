@@ -181,6 +181,9 @@ public class GamePlay extends ActionBarActivity implements AdapterView.OnItemCli
 
     public void moveTile(int position) {
         game.moveTile(position);
+
+		//HIER GEBLEVEN FORLOOPJE
+
         updateTilePositions();
     }
     public void updateTilePositions() {

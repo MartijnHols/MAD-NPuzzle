@@ -172,7 +172,7 @@ public class PlayerSelection extends ActionBarActivity implements GameServerConn
 		final String senderName = sender;
 		final String senderID = ID;
 		final PlayerSelection self = this;
-		PlayerSelection.this.runOnUiThread(new Runnable() {
+		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
 				new AlertDialog.Builder(self)

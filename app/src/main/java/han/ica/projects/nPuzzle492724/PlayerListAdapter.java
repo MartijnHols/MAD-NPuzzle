@@ -48,10 +48,8 @@ public class PlayerListAdapter extends BaseAdapter {
 		TwoLineListItem twoLineListItem;
 
 		if (convertView == null) {
-			LayoutInflater inflater = (LayoutInflater) context
-					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			twoLineListItem = (TwoLineListItem) inflater.inflate(
-					android.R.layout.simple_list_item_2, null);
+			LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			twoLineListItem = (TwoLineListItem) inflater.inflate(android.R.layout.simple_list_item_2, null);
 		} else {
 			twoLineListItem = (TwoLineListItem) convertView;
 		}
@@ -59,8 +57,11 @@ public class PlayerListAdapter extends BaseAdapter {
 		TextView naam = twoLineListItem.getText1();
 		TextView stad = twoLineListItem.getText2();
 
-		naam.setText(playerInfo.get(position).naam);
-		stad.setText(playerInfo.get(position).stad);
+		PlayerListItem pli = playerInfo.get(position);
+
+		naam.setText(pli.naam);
+		stad.setText(pli.stad);
+		twoLineListItem.setTag(pli);
 
 		return twoLineListItem;
 	}

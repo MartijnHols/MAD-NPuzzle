@@ -33,10 +33,6 @@ class PlayerListItem {
     public String id;
     public double afstand;
 	public String stad;
-
-    public String getId() {
-        return id;
-    }
 }
 
 public class PlayerSelection extends ActionBarActivity implements GameServerConnectionListener, AdapterView.OnItemClickListener {
@@ -167,9 +163,9 @@ public class PlayerSelection extends ActionBarActivity implements GameServerConn
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        String clickedPlayerID = (String) view.getTag();
+        PlayerListItem pli = (PlayerListItem) view.getTag();
 
-		GameServerConnection.getInstance().sendGameInvitation("harry", clickedPlayerID);
+		GameServerConnection.getInstance().sendGameInvitation("harry", pli.id);
     }
 
     private void showInvitationDialog(final String ID, final String sender) {

@@ -43,18 +43,22 @@ public class MultiplayerConnecting extends ActionBarActivity implements GameServ
 
 		locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
-		// Source: http://stackoverflow.com/a/10524443/684353
-		Location lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-		if (lastKnownLocation != null && lastKnownLocation.getTime() > Calendar.getInstance().getTimeInMillis() - MAX_LOCATION_AGE) {
-			Log.i("MultiplayerConnection", "Already known location: " + location.getLatitude() + " and " + location.getLongitude());
-			txtConnectStatus.setText("Location received, waiting for connection...");
-			location = lastKnownLocation;
-			loadProgress();
-		} else {
-			Log.i("MultiplayerConnection", "Requesting location updates...");
-			locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
-			locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
-		}
+		location = new Location("best");
+		location.setLatitude(52.079114);
+		location.setLongitude(5.4980682);
+		loadProgress();
+//		// Source: http://stackoverflow.com/a/10524443/684353
+//		Location lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+//		if (lastKnownLocation != null && lastKnownLocation.getTime() > Calendar.getInstance().getTimeInMillis() - MAX_LOCATION_AGE) {
+//			Log.i("MultiplayerConnection", "Already known location: " + location.getLatitude() + " and " + location.getLongitude());
+//			txtConnectStatus.setText("Location received, waiting for connection...");
+//			location = lastKnownLocation;
+//			loadProgress();
+//		} else {
+//			Log.i("MultiplayerConnection", "Requesting location updates...");
+//			locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
+//			locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
+//		}
 	}
 
 	private boolean isConnected = false;

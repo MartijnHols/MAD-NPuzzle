@@ -9,6 +9,7 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.TwoLineListItem;
 
 import org.w3c.dom.Text;
 
@@ -44,18 +45,24 @@ public class PlayerListAdapter extends BaseAdapter {
 	// create a new ImageView for each item referenced by the Adapter
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-		TextView tv;
-		if (convertView == null) {
-			tv = new TextView(context);
-			System.out.println(tv);
-			tv.setLayoutParams(new ListView.LayoutParams(ListView.LayoutParams.MATCH_PARENT, 0));
-		} else {
-			tv = (TextView)convertView;
-		}
-		tv.setText(playerInfo.get(position).naam);
-		tv.setTag(playerInfo.get(position).id);
-		return tv;
-	}
+		TwoLineListItem twoLineListItem;
 
+		if (convertView == null) {
+			LayoutInflater inflater = (LayoutInflater) context
+					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			twoLineListItem = (TwoLineListItem) inflater.inflate(
+					android.R.layout.simple_list_item_2, null);
+		} else {
+			twoLineListItem = (TwoLineListItem) convertView;
+		}
+
+		TextView naam = twoLineListItem.getText1();
+		TextView stad = twoLineListItem.getText2();
+
+		naam.setText(playerInfo.get(position).naam);
+		stad.setText(playerInfo.get(position).stad);
+
+		return twoLineListItem;
+	}
 }
 

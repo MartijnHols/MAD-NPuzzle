@@ -32,6 +32,7 @@ class PlayerListItem {
     public String naam;
     public String id;
     public double afstand;
+	public String stad;
 
     public String getId() {
         return id;
@@ -108,7 +109,8 @@ public class PlayerSelection extends ActionBarActivity implements GameServerConn
                         pli.naam = data.getJSONObject(i).getString("naam");
                         JSONObject playerLoc = data.getJSONObject(i).getJSONObject("location");
                         pli.afstand = distFrom(location.getLatitude(), location.getLongitude(), playerLoc.getDouble("lat"), playerLoc.getDouble("lon"));
-						Log.i("PlayerSelection", "Afstand tot " + pli.naam + ": " + pli.afstand + "(" + getCityName(playerLoc.getDouble("lat"), playerLoc.getDouble("lon")) + ")");
+						pli.stad = getCityName(playerLoc.getDouble("lat"), playerLoc.getDouble("lon"));
+						Log.i("PlayerSelection", "Afstand tot " + pli.naam + ": " + pli.afstand + "(" + pli.stad + ")");
                         playerList.add(pli);
                     }
                 } catch (JSONException e) {
@@ -167,31 +169,31 @@ public class PlayerSelection extends ActionBarActivity implements GameServerConn
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         String clickedPlayerID = (String) view.getTag();
 
-        GameServerConnection.getInstance().sendGameInvitation("harry", clickedPlayerID);
+		GameServerConnection.getInstance().sendGameInvitation("harry", clickedPlayerID);
     }
 
     private void showInvitationDialog(final String ID, final String sender) {
         final String senderName = sender;
         final String senderID = ID;
         final PlayerSelection self = this;
-        PlayerSelection.this.runOnUiThread(new Runnable() {
-                                               @Override
-                                               public void run() {
-                                                   new AlertDialog.Builder(self)
-                                                           .setTitle("Game invite")
-                                                           .setMessage(senderName + " is inviting you to play N-Puzzle! Accept?")
-                                                           .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
-                                                               public void onClick(DialogInterface dialog, int which) {
-                                                                   // do nothing
-                                                               }
-                                                           })
-                                                           .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                                                               public void onClick(DialogInterface dialog, int which) {
-                                                                   startMultiplayerGame(senderID);
-                                                               }
-                                                           })
-                                                           .show();
-                                               }
+		PlayerSelection.this.runOnUiThread(new Runnable() {
+											   @Override
+											   public void run() {
+												   new AlertDialog.Builder(self)
+														   .setTitle("Game invite")
+														   .setMessage(senderName + " is inviting you to play N-Puzzle! Accept?")
+														   .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+															   public void onClick(DialogInterface dialog, int which) {
+																   // do nothing
+															   }
+														   })
+														   .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+															   public void onClick(DialogInterface dialog, int which) {
+																   startMultiplayerGame(senderID);
+															   }
+														   })
+														   .show();
+											   }
                                            }
         );
     }
@@ -202,7 +204,7 @@ public class PlayerSelection extends ActionBarActivity implements GameServerConn
         finish();
     }
     private void startMultiplayerGame(String senderID) {
-        GameServerConnection.getInstance().startMultiplayerGame(senderID);
+		GameServerConnection.getInstance().startMultiplayerGame(senderID);
 
     }
 

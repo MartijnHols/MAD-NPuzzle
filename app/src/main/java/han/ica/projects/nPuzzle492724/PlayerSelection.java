@@ -32,10 +32,7 @@ class PlayerListItem {
     public String naam;
     public String id;
     public double afstand;
-
-    public String getId() {
-        return id;
-    }
+	public String stad;
 }
 
 public class PlayerSelection extends ActionBarActivity implements GameServerConnectionListener, AdapterView.OnItemClickListener {
@@ -108,7 +105,8 @@ public class PlayerSelection extends ActionBarActivity implements GameServerConn
                         pli.naam = data.getJSONObject(i).getString("naam");
                         JSONObject playerLoc = data.getJSONObject(i).getJSONObject("location");
                         pli.afstand = distFrom(location.getLatitude(), location.getLongitude(), playerLoc.getDouble("lat"), playerLoc.getDouble("lon"));
-						Log.i("PlayerSelection", "Afstand tot " + pli.naam + ": " + pli.afstand + "(" + getCityName(playerLoc.getDouble("lat"), playerLoc.getDouble("lon")) + ")");
+						pli.stad = getCityName(playerLoc.getDouble("lat"), playerLoc.getDouble("lon"));
+						Log.i("PlayerSelection", "Afstand tot " + pli.naam + ": " + pli.afstand + "(" + pli.stad + ")");
                         playerList.add(pli);
                     }
                 } catch (JSONException e) {
@@ -165,9 +163,8 @@ public class PlayerSelection extends ActionBarActivity implements GameServerConn
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        String clickedPlayerID = (String) view.getTag();
-
-        GameServerConnection.getInstance().sendGameInvitation(clickedPlayerID);
+        PlayerListItem pli = (PlayerListItem) view.getTag();
+        GameServerConnection.getInstance().sendGameInvitation(pli.id);
     }
 
     private void showInvitationDialog(final String ID, final String sender) {
@@ -204,7 +201,6 @@ public class PlayerSelection extends ActionBarActivity implements GameServerConn
     }
     private void sendAccept(String senderID) {
         GameServerConnection.getInstance().startMultiplayerGame(senderID);
-
     }
 
     private void refreshPlayerList() {

@@ -127,7 +127,7 @@ namespace NPuzzleGameServer
                     foreach (var item in Sessions.Sessions)
                     {
                         var con = (NPuzzleConnection)item;
-                        if (!con.inGame)
+                        if (con.name != null && !con.inGame)
                         {
                             var playerInfo = new Dictionary<string, object>();
                             playerInfo.Add("id", con.ID);

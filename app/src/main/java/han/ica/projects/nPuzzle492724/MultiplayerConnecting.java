@@ -19,7 +19,7 @@ public class MultiplayerConnecting extends ActionBarActivity implements GameServ
 
 	private Location location = null;
 
-	public static int MAX_LOCATION_AGE = 10 * 60 * 1000;
+	public static int MAX_LOCATION_AGE = 60 * 60 * 1000;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -57,31 +57,14 @@ public class MultiplayerConnecting extends ActionBarActivity implements GameServ
 		}
 	}
 
-	/*//Source: http://stackoverflow.com/a/15893406/684353
-	public static double distFrom(
-    double lat1, double lng1, double lat2, double lng2)
-{
-    double earthRadius = 3958.75;
-    double dLat = Math.toRadians(lat2-lat1);
-    double dLng = Math.toRadians(lng2-lng1);
-    double a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-        Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
-        Math.sin(dLng/2) * Math.sin(dLng/2);
-    double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    double dist = earthRadius * c;
-
-    return dist;
-} */
-
 	private boolean isConnected = false;
-
 	@Override
 	public void onConnect() {
 		Log.i("MultiplayerConnection", "Connected!");
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-				txtConnectStatus.setText("Connected!");
+				txtConnectStatus.setText("Connected! Wachten op locatie...");
 			}
 		});
 
@@ -126,16 +109,6 @@ public class MultiplayerConnecting extends ActionBarActivity implements GameServ
 		}
 	}
 
-	class LatLng {
-		double lat;
-		double lon;
-
-		public LatLng(double lat, double lon) {
-			this.lat = lat;
-			this.lon = lon;
-		}
-	}
-
 	@Override
 	public void onMessage(Message message) {
 		Log.i("MultiplayerConnection", message.command);
@@ -152,7 +125,9 @@ public class MultiplayerConnecting extends ActionBarActivity implements GameServ
 	}
 
 	public void goToPlayerSelection() {
-		startActivity(new Intent(MultiplayerConnecting.this, PlayerSelection.class));
+		Intent i = new Intent(MultiplayerConnecting.this, PlayerSelection.class);
+		i.putExtra("location", location);
+		startActivity(i);
 		finish();
 	}
 
@@ -165,7 +140,6 @@ public class MultiplayerConnecting extends ActionBarActivity implements GameServ
 	@Override
 	public void finish() {
 		GameServerConnection.getInstance().removeListener(this);
-
 		super.finish();
 	}
 }

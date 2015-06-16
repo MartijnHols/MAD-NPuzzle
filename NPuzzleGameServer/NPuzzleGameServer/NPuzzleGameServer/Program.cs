@@ -31,6 +31,7 @@ namespace NPuzzleGameServer
     {
         private string name;
         private Location location;
+        private bool inGame = false;
 
         protected override void OnMessage(MessageEventArgs e)
         {
@@ -54,12 +55,14 @@ namespace NPuzzleGameServer
                     break;
                 case "sendInvitation":
                     var invitedPlayerID = msg.data.id;
+                    var senderID = this.ID;
                     List<dynamic> data = new List<dynamic>();
                     var sender = msg.data.sender;
                     var invitationInfo = new Dictionary<string, object>();
                     var sendername = this.name;
                     invitationInfo.Add("sender", msg.data.sender);
                     invitationInfo.Add("sendername", sendername);
+                    invitationInfo.Add("senderID", senderID);
 
                     data.Add(invitationInfo);
                     var match = false;
@@ -89,16 +92,49 @@ namespace NPuzzleGameServer
                     }
 
                     break;
+                case "invitationAccept":
+                    senderID = msg.data.id;
+                    invitedPlayerID = this.ID;
+                    List<dynamic> info = new List<dynamic>();
+                    var acceptInfo = new Dictionary<string, object>();
+
+                    acceptInfo.Add("senderID", senderID);
+                    acceptInfo.Add("invitedPlayerID", invitedPlayerID);
+
+                    foreach (var item in Sessions.Sessions)
+                    {
+                        var con = (NPuzzleConnection)item;
+                        if ((con.ID == senderID) || (con.ID == invitedPlayerID))
+                        {
+                            con.inGame = true;
+                        }
+                    }
+
+                    info.Add(acceptInfo);
+                    Sessions.SendTo(invitedPlayerID, Json.Encode(new Message()
+                        {
+                            command = "inviteAccept",
+                            data = info
+                        }));
+                    Sessions.SendTo(senderID, Json.Encode(new Message()
+                        {
+                            command = "inviteAccept",
+                            data = info
+                        }));
+                    break;
                 case "getPlayers":
                     List<dynamic> players = new List<dynamic>();
                     foreach (var item in Sessions.Sessions)
                     {
                         var con = (NPuzzleConnection)item;
-                        var playerInfo = new Dictionary<string, object>();
-                        playerInfo.Add("id", con.ID);
-                        playerInfo.Add("naam", con.name);
-                        playerInfo.Add("location", con.location);
-                        players.Add(playerInfo);
+                        if (!con.inGame)
+                        {
+                            var playerInfo = new Dictionary<string, object>();
+                            playerInfo.Add("id", con.ID);
+                            playerInfo.Add("naam", con.name);
+                            playerInfo.Add("location", con.location);
+                            players.Add(playerInfo);
+                        }
                     }
 
                     Send(new Message()

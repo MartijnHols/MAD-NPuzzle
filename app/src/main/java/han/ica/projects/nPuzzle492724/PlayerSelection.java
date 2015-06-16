@@ -76,9 +76,12 @@ public class PlayerSelection extends ActionBarActivity implements GameServerConn
                     }
                 });
                 break;
+            case "inviteAccept":
+                start();
+                break;
             case "invite":
                 try {
-                    showInvitationDialog(data.getJSONObject(0).getString("sendername"));
+                    showInvitationDialog(data.getJSONObject(0).getString("senderID"), data.getJSONObject(0).getString("sendername"));
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -108,8 +111,9 @@ public class PlayerSelection extends ActionBarActivity implements GameServerConn
         GameServerConnection.getInstance().sendGameInvitation("harry", clickedPlayerID);
     }
 
-    private void showInvitationDialog(final String sender) {
+    private void showInvitationDialog(final String ID, final String sender) {
         final String senderName = sender;
+        final String senderID = ID;
         final PlayerSelection self = this;
         PlayerSelection.this.runOnUiThread(new Runnable() {
                                                @Override
@@ -124,7 +128,7 @@ public class PlayerSelection extends ActionBarActivity implements GameServerConn
                                                            })
                                                            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                                                                public void onClick(DialogInterface dialog, int which) {
-                                                                   startMultiplayerGame();
+                                                                   startMultiplayerGame(senderID);
                                                                }
                                                            })
                                                            .show();
@@ -133,10 +137,14 @@ public class PlayerSelection extends ActionBarActivity implements GameServerConn
         );
     }
 
-    private void startMultiplayerGame() {
+    private void start(){
         Intent i = new Intent(this, ImageSelection.class);
         startActivity(i);
         finish();
+    }
+    private void startMultiplayerGame(String senderID) {
+        GameServerConnection.getInstance().startMultiplayerGame(senderID);
+
     }
 
     private void refreshPlayerList() {

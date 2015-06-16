@@ -142,6 +142,19 @@ public class GameServerConnection {
 		mWebSocketClient.send(m.toString());
 	}
 
+	public void startMultiplayerGame(String senderID){
+		Message m = new Message("invitationAccept");
+		JSONObject data = new JSONObject();
+		try {
+			data.put("id", senderID);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		m.data = data;
+
+		send(m);
+	}
+
 	public  void sendGameInvitation (String name, String id){
 		Message m = new Message("sendInvitation");
 		JSONObject data = new JSONObject();

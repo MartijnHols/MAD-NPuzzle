@@ -3,9 +3,12 @@ package han.ica.projects.nPuzzle492724;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -18,14 +21,17 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
+import java.util.Locale;
 
 class PlayerListItem {
     public String naam;
     public String id;
-    public int afstand;
+    public double afstand;
 
     public String getId() {
         return id;
@@ -68,6 +74,25 @@ public class PlayerSelection extends ActionBarActivity implements GameServerConn
         return dist;
     }
 
+	public String getCityName(double lat, double lng) {
+		//http://stackoverflow.com/a/28939857/684353
+		Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+		List<Address> addresses;
+		try {
+			addresses = geocoder.getFromLocation(lat, lng, 1);
+			if (addresses.size()>0) {
+				return addresses.get(0).getLocality();
+//				String stateName = addresses.get(0).getAddressLine(1);
+//				//Toast.makeText(getApplicationContext(),stateName , 1).show();
+//				String countryName = addresses.get(0).getAddressLine(2);
+			}
+		}catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+
     @Override
     public void onMessage(Message message) {
         JSONArray data = (JSONArray) message.data;
@@ -82,7 +107,8 @@ public class PlayerSelection extends ActionBarActivity implements GameServerConn
                         pli.id = data.getJSONObject(i).getString("id");
                         pli.naam = data.getJSONObject(i).getString("naam");
                         JSONObject playerLoc = data.getJSONObject(i).getJSONObject("location");
-                        pli.afstand = (int)distFrom(location.getLatitude(), location.getLongitude(), playerLoc.getDouble("lat"), playerLoc.getDouble("lon"));
+                        pli.afstand = distFrom(location.getLatitude(), location.getLongitude(), playerLoc.getDouble("lat"), playerLoc.getDouble("lon"));
+						Log.i("PlayerSelection", "Afstand tot " + pli.naam + ": " + pli.afstand + "(" + getCityName(playerLoc.getDouble("lat"), playerLoc.getDouble("lon")) + ")");
                         playerList.add(pli);
                     }
                 } catch (JSONException e) {
@@ -92,7 +118,13 @@ public class PlayerSelection extends ActionBarActivity implements GameServerConn
                 Collections.sort(playerList, new Comparator<PlayerListItem>() {
                     @Override
                     public int compare(PlayerListItem o1, PlayerListItem o2) {
-                        return o1.afstand - o2.afstand;
+						if (o1.afstand > o2.afstand) {
+							return 1;
+						} else if (o1.afstand < o2.afstand) {
+							return -1;
+						} else {
+							return 0;
+						}
                     }
                 });
 

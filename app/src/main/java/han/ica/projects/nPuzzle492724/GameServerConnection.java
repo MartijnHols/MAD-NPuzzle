@@ -142,6 +142,19 @@ public class GameServerConnection {
 		mWebSocketClient.send(m.toString());
 	}
 
+	public void sendEffect(String versusPlayerId){
+		Message m = new Message("sendEffect");
+		JSONObject data = new JSONObject();
+		try {
+			data.put("versusPlayerId", versusPlayerId);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		m.data = data;
+
+		send(m);
+	}
+
 	public void acceptInvite(String inviterId){
 		Message m = new Message("invitationAccept");
 		JSONObject data = new JSONObject();

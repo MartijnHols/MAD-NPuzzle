@@ -26,7 +26,7 @@ public class Game {
     public int numMoves;
 
 
-    public List rowsCompleted = new ArrayList();
+    public List<Integer> rowsCompleted = new ArrayList();
     /**
      * De posities van de tiles zoals dat wordt weergegeven (1 tot difficulty + 1).
      */
@@ -96,7 +96,7 @@ public class Game {
 
     public List<Integer> completedRows = new ArrayList<Integer>();
 
-    public List getCompletedRows(){
+    public List<Integer> getCompletedRows(){
         for (int rij = 0; rij < getRows(); rij++) {
             if (isRowComplete(rij)) {
                 rowsCompleted.add(rij);

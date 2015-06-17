@@ -306,13 +306,21 @@ public class GamePlay extends ActionBarActivity implements GameServerConnectionL
 		}
 
 		if (game.isGameComplete()) {
-			game.isActive = false;
-			Intent i = new Intent(this, YouWin.class);
-			i.putExtra("playerMoves", game.numMoves)
-				.putExtra("resourceId", image.getResourceId());
-			startActivity(i);
-			end();
+			if (isMultiplayerGame()){
+				GameServerConnection.getInstance().gameComplete(versusPlayerId);
+			}
+				game.isActive = false;
+				Intent i = new Intent(this, YouWin.class);
+				i.putExtra("playerMoves", game.numMoves)
+					.putExtra("resourceId", image.getResourceId());
+				startActivity(i);
+				end();
+
 		}
+	}
+
+	private boolean isMultiplayerGame() {
+		return versusPlayerId != null;
 	}
 
 	public void toast(String message) {
@@ -333,6 +341,15 @@ public class GamePlay extends ActionBarActivity implements GameServerConnectionL
 	public void end() {
 		cancelTimers();
 		this.finish();
+	}
+
+	private void gameLost(){
+		game.isActive = false;
+		Intent i = new Intent(this, YouLose.class);
+		i.putExtra("playerMoves", game.numMoves)
+			.putExtra("resourceId", image.getResourceId());
+		startActivity(i);
+		end();
 	}
 
 	private void onEffectRecieved(){
@@ -388,6 +405,9 @@ public class GamePlay extends ActionBarActivity implements GameServerConnectionL
 		switch (command) {
 			case "effectRecieved":
 				onEffectRecieved();
+				break;
+			case "gameLost":
+				gameLost();
 				break;
 		}
 	}

@@ -63,9 +63,21 @@ namespace NPuzzleGameServer
                     // De speler heeft een rij afgerond en stuurt een negatief effect naar de tegenstander
                     sendEffect(msg.data.versusPlayerId);
                     break;
+                case "gameComplete":
+                    gameComplete(msg.data.versusPlayerId);
+                    break;
                 default:
                     throw new Exception("Invalid command: " + msg.command);
             }
+        }
+
+        private void gameComplete(string versusPlayerId)
+        {
+            Sessions.SendTo(versusPlayerId, Json.Encode(new Message()
+                {
+                    command = "gameLost",
+                    data = null
+                }));
         }
 
         private void sendEffect(string versusPlayerId)

@@ -27,4 +27,5 @@
     <string name="title_activity_multiplayer_waiting_for_game_start">Wachten op spel start…</string>
     <string name="challenge_someone">Daag iemand uit.</string>
     <string name="wait_for_game_start">Even wachten tot het spel wordt gestart.</string>
+    <string name="title_activity_you_lose">YouLose</string>
 </resources>

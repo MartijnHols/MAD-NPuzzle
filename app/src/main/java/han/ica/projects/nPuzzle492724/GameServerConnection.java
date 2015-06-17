@@ -62,7 +62,7 @@ public class GameServerConnection {
 		if (isConnected()) {
 			return; // kan geen normale exception in java
 		}
-		String address = "ws://192.168.2.9:1337";
+		String address = "ws://192.168.2.1:1337";
 		Log.i("WebSocket", "Connecting to: " + address);
 		URI uri;
 		try {
@@ -144,6 +144,19 @@ public class GameServerConnection {
 
 	public void sendEffect(String versusPlayerId){
 		Message m = new Message("sendEffect");
+		JSONObject data = new JSONObject();
+		try {
+			data.put("versusPlayerId", versusPlayerId);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		m.data = data;
+
+		send(m);
+	}
+
+	public void gameComplete(String versusPlayerId){
+		Message m = new Message("gameComplete");
 		JSONObject data = new JSONObject();
 		try {
 			data.put("versusPlayerId", versusPlayerId);

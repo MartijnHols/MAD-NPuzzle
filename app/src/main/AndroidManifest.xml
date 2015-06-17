@@ -69,6 +69,10 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="han.ica.projects.nPuzzle492724.PlayerSelection" />
         </activity>
+        <activity
+            android:name=".YouLose"
+            android:label="@string/title_activity_you_lose" >
+        </activity>
     </application>
 
 </manifest>

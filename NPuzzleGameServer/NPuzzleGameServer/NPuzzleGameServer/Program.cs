@@ -107,15 +107,24 @@ namespace NPuzzleGameServer
 
         private void sendInvite(string toPlayerId)
         {
+            if (toPlayerId == this.ID)
+            {
+                Send(new Message()
+                {
+                    command = "cantInviteSelf",
+                    data = null
+                });
+                return;
+            }
             var data = new Dictionary<string, object>();
             var sendername = this.name;
             data.Add("sendername", sendername);
             data.Add("senderID", this.ID);
 
             var match = false;
-            foreach (var item in Sessions.Sessions)
+            foreach (NPuzzleConnection item in Sessions.Sessions)
             {
-                if (item.ID == toPlayerId)
+                if (item.ID == toPlayerId && !item.inGame)
                 {
                     match = true;
                     break;

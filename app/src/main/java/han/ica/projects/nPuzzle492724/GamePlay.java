@@ -49,6 +49,8 @@ public class GamePlay extends ActionBarActivity implements GameServerConnectionL
         game.difficulty = i.getIntExtra("difficulty", 1);
 		versusPlayerId = i.getStringExtra("versusPlayerId");
 
+		GameServerConnection.getInstance().addListener(this);
+
 		image = new Image(this, game.imageResourceId);
 		gvPuzzle = (GridView) findViewById(R.id.gvPuzzle);
         vRectangle = (View) findViewById(R.id.vRectangle);
@@ -115,7 +117,7 @@ public class GamePlay extends ActionBarActivity implements GameServerConnectionL
 						if (!game.isActive) {
 							//Log.d("NPuzzle", "Shuffling...");
 							game.doPseudoRandomMove();
-                            updateTilePositions();
+							updateTilePositions();
 						}
 					}
 				});
@@ -238,11 +240,11 @@ public class GamePlay extends ActionBarActivity implements GameServerConnectionL
         }
         tmrResetNumbers = new Timer();
         tmrResetNumbers.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                resetTileNumber();
-            }
-        }, 10 * 1000);
+			@Override
+			public void run() {
+				resetTileNumber();
+			}
+		}, 10 * 1000);
     }
     private void resetTileNumber() {
         for (int i = 0; i < (game.difficulty + 1); i++) {
@@ -251,11 +253,11 @@ public class GamePlay extends ActionBarActivity implements GameServerConnectionL
         }
 
         getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                gvPuzzle.invalidateViews();
-            }
-        });
+			@Override
+			public void run() {
+				gvPuzzle.invalidateViews();
+			}
+		});
     }
 
     private int[] getSequentialArray(int num) {
@@ -334,7 +336,12 @@ public class GamePlay extends ActionBarActivity implements GameServerConnectionL
 	}
 
 	private void onEffectRecieved(){
-		flashbang();
+		getActivity().runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				flashbang();
+			}
+		});
 	}
 
 	@Override

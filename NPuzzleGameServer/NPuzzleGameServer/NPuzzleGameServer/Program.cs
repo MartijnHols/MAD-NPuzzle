@@ -72,7 +72,8 @@ namespace NPuzzleGameServer
         {
             Sessions.SendTo(versusPlayerId, Json.Encode(new Message()
                 {
-                    command = "effectRecieved"
+                    command = "effectRecieved",
+                    data = null
                 }));
         }
 

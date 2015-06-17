@@ -90,6 +90,13 @@ public class PlayerSelection extends ActionBarActivity implements GameServerConn
 		return null;
 	}
 
+	private void closeAlert() {
+		if (openAlert != null) {
+			openAlert.cancel();
+			openAlert = null;
+		}
+	}
+
 	@Override
 	public void onMessage(Message message) {
 		String command = message.command;
@@ -125,6 +132,7 @@ public class PlayerSelection extends ActionBarActivity implements GameServerConn
 		}
 	}
 
+	AlertDialog openAlert = null;
 	private void onInviteReceived(JSONObject data) {
 		try {
 			final String senderName = data.getString("sendername");
@@ -133,9 +141,10 @@ public class PlayerSelection extends ActionBarActivity implements GameServerConn
 			runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
-					new AlertDialog.Builder(self)
+					closeAlert();
+					openAlert = new AlertDialog.Builder(self)
 							.setTitle("Game invite")
-							.setMessage(senderName + " is inviting you to play N-Puzzle! Accept?")
+						.setMessage(senderName + " is inviting you to play N-Puzzle! Accept?")
 							.setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
 								public void onClick(DialogInterface dialog, int which) {
 									// do nothing
@@ -166,10 +175,13 @@ public class PlayerSelection extends ActionBarActivity implements GameServerConn
 		Intent i = new Intent(this, ImageSelection.class);
 		i.putExtra("versusPlayerId", playerId);
 		startActivity(i);
+		closeAlert();
 	}
+
 	private void onInviteAcceptedSuccessful() {
 		Intent i = new Intent(this, MultiplayerWaitingForGameStart.class);
 		startActivity(i);
+		closeAlert();
 	}
 
 	private void onPlayersReceived(JSONArray data) {
@@ -230,7 +242,8 @@ public class PlayerSelection extends ActionBarActivity implements GameServerConn
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-				new AlertDialog.Builder(self)
+				closeAlert();
+				openAlert = new AlertDialog.Builder(self)
 					.setTitle("Invite sent")
 					.setMessage("Waiting for response...")
 					.setCancelable(true)

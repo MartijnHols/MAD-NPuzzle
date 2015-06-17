@@ -16,8 +16,8 @@
     <string name="moves">Moves:</string>
     <string name="newGame">Nieuw spel</string>
     <string name="chooseMode">Kies je modus:</string>
-    <string name="singleplayer">Solo</string>
-    <string name="multiplayer">Versus</string>
+    <string name="singleplayer">Singleplayer</string>
+    <string name="multiplayer">Versus (1v1)</string>
     <string name="title_activity_player_selection">Speler lijst</string>
     <string name="accept">Accept</string>
 

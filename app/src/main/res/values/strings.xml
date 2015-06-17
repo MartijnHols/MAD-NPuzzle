@@ -17,13 +17,14 @@
     <string name="newGame">Nieuw spel</string>
     <string name="chooseMode">Kies je modus:</string>
     <string name="singleplayer">Singleplayer</string>
-    <string name="multiplayer">Multiplayer</string>
-    <string name="title_activity_player_selection">PlayerSelection</string>
+    <string name="multiplayer">Versus (1v1)</string>
+    <string name="title_activity_player_selection">Speler lijst</string>
     <string name="accept">Accept</string>
 
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
-    <string name="title_activity_multiplayer_connecting">Connecting...</string>
-    <string name="title_activity_multiplayer_waiting_for_game_start">Wachten op spel start...
-    </string>
+    <string name="title_activity_multiplayer_connecting">Connecting…</string>
+    <string name="title_activity_multiplayer_waiting_for_game_start">Wachten op spel start…</string>
+    <string name="challenge_someone">Daag iemand uit.</string>
+    <string name="wait_for_game_start">Even wachten tot het spel wordt gestart.</string>
 </resources>

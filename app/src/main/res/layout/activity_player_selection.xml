@@ -22,7 +22,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Select a player to challenge"
+        android:text="@string/challenge_someone"
         android:id="@+id/tvChallengePlayer"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"

@@ -3,6 +3,7 @@ package han.ica.projects.nPuzzle492724;
 import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -15,6 +16,13 @@ public class MultiplayerWaitingForGameStart extends ActionBarActivity implements
 		setContentView(R.layout.activity_multiplayer_waiting_for_game_start);
 
 		GameServerConnection.getInstance().addListener(this);
+		Intent i = getIntent();
+		String versusPlayerId = i.getStringExtra("versusPlayerId");
+		Long resourceId = i.getLongExtra("resourceId", -1);
+		int difficulty = i.getIntExtra("difficulty", -1);
+		if (versusPlayerId != null && resourceId != -1 && difficulty != -1){
+			GameServerConnection.getInstance().startGame(versusPlayerId, resourceId, difficulty);
+		}
 	}
 
 	@Override

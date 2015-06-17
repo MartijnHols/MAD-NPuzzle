@@ -82,6 +82,15 @@ namespace NPuzzleGameServer
 
         private void sendInvite(string toPlayerId)
         {
+            if (toPlayerId == this.ID)
+            {
+                Send(new Message()
+                {
+                    command = "cantInviteSelf",
+                    data = null
+                });
+                return;
+            }
             var data = new Dictionary<string, object>();
             var sendername = this.name;
             data.Add("sendername", sendername);

@@ -129,6 +129,9 @@ public class PlayerSelection extends ActionBarActivity implements GameServerConn
 			case "playerUnavailable":
 				onInvitePlayerUnavailable();
 				break;
+			case "cantInviteSelf":
+				onCantInviteSelf();
+				break;
 		}
 	}
 
@@ -163,11 +166,24 @@ public class PlayerSelection extends ActionBarActivity implements GameServerConn
 		}
 	}
 	private void onInvitePlayerUnavailable() {
+		refreshPlayerList();
 		final PlayerSelection self = this;
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-				Toast.makeText(self, "This player is unavailable. Please refresh.", Toast.LENGTH_LONG).show();
+				Toast.makeText(self, "Deze speler is niet langer beschikbaar.", Toast.LENGTH_LONG).show();
+				closeAlert();
+			}
+		});
+	}
+	private void onCantInviteSelf() {
+		refreshPlayerList();
+		final PlayerSelection self = this;
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				Toast.makeText(self, "Je kan jezelf niet uitdagen. Kies iemand anders.", Toast.LENGTH_LONG).show();
+				closeAlert();
 			}
 		});
 	}

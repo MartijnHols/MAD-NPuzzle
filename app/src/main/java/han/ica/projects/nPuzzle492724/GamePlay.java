@@ -16,13 +16,15 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.Toast;
 
+import org.json.JSONArray;
+
 import java.util.HashMap;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
 
-public class GamePlay extends ActionBarActivity implements AdapterView.OnItemClickListener {
+public class GamePlay extends ActionBarActivity implements GameServerConnectionListener, AdapterView.OnItemClickListener {
     public Game game;
 
 	private Image image;
@@ -182,11 +184,24 @@ public class GamePlay extends ActionBarActivity implements AdapterView.OnItemCli
     public void moveTile(int position) {
         game.moveTile(position);
 
-		//HIER GEBLEVEN FORLOOPJE
+		checkIfNewRowCompleted();
 
-        updateTilePositions();
+		updateTilePositions();
     }
-    public void updateTilePositions() {
+
+	private void checkIfNewRowCompleted() {
+		for(int item : game.getCompletedRows()) {
+			if (game.completedRows.contains(item)) {
+				//
+			} else {
+				game.completedRows.add(item);
+				GameServerConnection.getInstance().sendEffect(versusPlayerId);
+			}
+		}
+
+	}
+
+	public void updateTilePositions() {
         HashMap<Integer, Tile> dictTiles = new HashMap<>();
         for (Tile tile : tiles) {
             dictTiles.put(tile.getNumber(), tile);
@@ -318,6 +333,10 @@ public class GamePlay extends ActionBarActivity implements AdapterView.OnItemCli
 		this.finish();
 	}
 
+	private void onEffectRecieved(){
+		flashbang();
+	}
+
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
@@ -354,5 +373,20 @@ public class GamePlay extends ActionBarActivity implements AdapterView.OnItemCli
 
 
 		return super.onOptionsItemSelected(item);
+	}
+
+	@Override
+	public void onMessage(Message message) {
+		String command = message.command;
+		switch (command) {
+			case "effectRecieved":
+				onEffectRecieved();
+				break;
+		}
+	}
+
+	@Override
+	public void onConnect() {
+
 	}
 }

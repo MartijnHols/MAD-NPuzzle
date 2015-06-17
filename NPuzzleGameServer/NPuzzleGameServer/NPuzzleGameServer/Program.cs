@@ -59,9 +59,21 @@ namespace NPuzzleGameServer
                     // De speler heeft een afbeelding en moeilijkheisgraad gekozen en de game moet starten
                     startGame(msg.data.invitedPlayerId, msg.data.resourceId, msg.data.difficulty);
                     break;
+                case "sendEffect":
+                    // De speler heeft een rij afgerond en stuurt een negatief effect naar de tegenstander
+                    sendEffect(msg.data.versusPlayerId);
+                    break;
                 default:
                     throw new Exception("Invalid command: " + msg.command);
             }
+        }
+
+        private void sendEffect(string versusPlayerId)
+        {
+            Sessions.SendTo(versusPlayerId, Json.Encode(new Message()
+                {
+                    command = "effectRecieved"
+                }));
         }
 
         private void register(string name, double lat, double lng)

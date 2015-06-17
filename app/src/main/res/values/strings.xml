@@ -28,4 +28,5 @@
     <string name="challenge_someone">Daag iemand uit.</string>
     <string name="wait_for_game_start">Even wachten tot het spel wordt gestart.</string>
     <string name="title_activity_you_lose">YouLose</string>
+    <string name="youlost">Je hebt het spel verloren!</string>
 </resources>

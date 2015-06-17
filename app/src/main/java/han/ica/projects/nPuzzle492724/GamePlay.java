@@ -186,16 +186,16 @@ public class GamePlay extends ActionBarActivity implements GameServerConnectionL
     public void moveTile(int position) {
         game.moveTile(position);
 
-		checkIfNewRowCompleted();
+		if(isMultiplayerGame()) {
+			checkIfNewRowCompleted();
+		}
 
 		updateTilePositions();
     }
 
 	private void checkIfNewRowCompleted() {
 		for(int item : game.getCompletedRows()) {
-			if (game.completedRows.contains(item)) {
-				//
-			} else {
+			if (!game.completedRows.contains(item)) {
 				game.completedRows.add(item);
 				GameServerConnection.getInstance().sendEffect(versusPlayerId);
 			}

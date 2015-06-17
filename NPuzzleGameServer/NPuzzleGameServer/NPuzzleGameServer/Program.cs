@@ -97,9 +97,9 @@ namespace NPuzzleGameServer
             data.Add("senderID", this.ID);
 
             var match = false;
-            foreach (var item in Sessions.Sessions)
+            foreach (NPuzzleConnection item in Sessions.Sessions)
             {
-                if (item.ID == toPlayerId)
+                if (item.ID == toPlayerId && !item.inGame)
                 {
                     match = true;
                     break;

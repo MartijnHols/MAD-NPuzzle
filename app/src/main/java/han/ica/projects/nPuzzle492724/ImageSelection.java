@@ -77,11 +77,16 @@ public class ImageSelection extends ActionBarActivity implements AdapterView.OnI
     @Override
     public void onItemClick(AdapterView<?> parent, View v, int position, long resourceId) {
         if (versusPlayerId != null) {
-            GameServerConnection.getInstance().startGame(versusPlayerId, resourceId, getDifficulty());
+			Intent i = new Intent(this, MultiplayerWaitingForGameStart.class);
+			i.putExtra("versusPlayerId", versusPlayerId)
+				.putExtra("resourceId", resourceId)
+				.putExtra("difficulty", getDifficulty());
+			startActivity(i);
+			finish();
         } else {
 			Intent i = new Intent(this, GamePlay.class);
 			i.putExtra("resourceId", (int) resourceId)
-					.putExtra("difficulty", getDifficulty());
+				.putExtra("difficulty", getDifficulty());
 			startActivity(i);
 		}
     }

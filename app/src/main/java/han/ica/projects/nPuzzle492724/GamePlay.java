@@ -16,13 +16,15 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.Toast;
 
+import org.json.JSONArray;
+
 import java.util.HashMap;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
 
-public class GamePlay extends ActionBarActivity implements AdapterView.OnItemClickListener {
+public class GamePlay extends ActionBarActivity implements GameServerConnectionListener, AdapterView.OnItemClickListener {
     public Game game;
 
 	private Image image;
@@ -32,6 +34,8 @@ public class GamePlay extends ActionBarActivity implements AdapterView.OnItemCli
     protected View vRectangle;
 
 	private Toast toast;
+
+	private String versusPlayerId;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +47,10 @@ public class GamePlay extends ActionBarActivity implements AdapterView.OnItemCli
         game = new Game();
         game.imageResourceId = i.getIntExtra("resourceId", 0);
         game.difficulty = i.getIntExtra("difficulty", 1);
-        
+		versusPlayerId = i.getStringExtra("versusPlayerId");
+
+		GameServerConnection.getInstance().addListener(this);
+
 		image = new Image(this, game.imageResourceId);
 		gvPuzzle = (GridView) findViewById(R.id.gvPuzzle);
         vRectangle = (View) findViewById(R.id.vRectangle);
@@ -110,7 +117,7 @@ public class GamePlay extends ActionBarActivity implements AdapterView.OnItemCli
 						if (!game.isActive) {
 							//Log.d("NPuzzle", "Shuffling...");
 							game.doPseudoRandomMove();
-                            updateTilePositions();
+							updateTilePositions();
 						}
 					}
 				});
@@ -178,9 +185,25 @@ public class GamePlay extends ActionBarActivity implements AdapterView.OnItemCli
 
     public void moveTile(int position) {
         game.moveTile(position);
-        updateTilePositions();
+
+		if(isMultiplayerGame()) {
+			checkIfNewRowCompleted();
+		}
+
+		updateTilePositions();
     }
-    public void updateTilePositions() {
+
+	private void checkIfNewRowCompleted() {
+		for(int item : game.getCompletedRows()) {
+			if (!game.completedRows.contains(item)) {
+				game.completedRows.add(item);
+				GameServerConnection.getInstance().sendEffect(versusPlayerId);
+			}
+		}
+
+	}
+
+	public void updateTilePositions() {
         HashMap<Integer, Tile> dictTiles = new HashMap<>();
         for (Tile tile : tiles) {
             dictTiles.put(tile.getNumber(), tile);
@@ -217,11 +240,11 @@ public class GamePlay extends ActionBarActivity implements AdapterView.OnItemCli
         }
         tmrResetNumbers = new Timer();
         tmrResetNumbers.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                resetTileNumber();
-            }
-        }, 10 * 1000);
+			@Override
+			public void run() {
+				resetTileNumber();
+			}
+		}, 10 * 1000);
     }
     private void resetTileNumber() {
         for (int i = 0; i < (game.difficulty + 1); i++) {
@@ -230,11 +253,11 @@ public class GamePlay extends ActionBarActivity implements AdapterView.OnItemCli
         }
 
         getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                gvPuzzle.invalidateViews();
-            }
-        });
+			@Override
+			public void run() {
+				gvPuzzle.invalidateViews();
+			}
+		});
     }
 
     private int[] getSequentialArray(int num) {
@@ -283,13 +306,21 @@ public class GamePlay extends ActionBarActivity implements AdapterView.OnItemCli
 		}
 
 		if (game.isGameComplete()) {
-			game.isActive = false;
-			Intent i = new Intent(this, YouWin.class);
-			i.putExtra("playerMoves", game.numMoves)
-				.putExtra("resourceId", image.getResourceId());
-			startActivity(i);
-			end();
+			if (isMultiplayerGame()){
+				GameServerConnection.getInstance().gameComplete(versusPlayerId);
+			}
+				game.isActive = false;
+				Intent i = new Intent(this, YouWin.class);
+				i.putExtra("playerMoves", game.numMoves)
+					.putExtra("resourceId", image.getResourceId());
+				startActivity(i);
+				end();
+
 		}
+	}
+
+	private boolean isMultiplayerGame() {
+		return versusPlayerId != null;
 	}
 
 	public void toast(String message) {
@@ -310,6 +341,24 @@ public class GamePlay extends ActionBarActivity implements AdapterView.OnItemCli
 	public void end() {
 		cancelTimers();
 		this.finish();
+	}
+
+	private void gameLost(){
+		game.isActive = false;
+		Intent i = new Intent(this, YouLose.class);
+		i.putExtra("playerMoves", game.numMoves)
+			.putExtra("resourceId", image.getResourceId());
+		startActivity(i);
+		end();
+	}
+
+	private void onEffectRecieved(){
+		getActivity().runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				flashbang();
+			}
+		});
 	}
 
 	@Override
@@ -348,5 +397,23 @@ public class GamePlay extends ActionBarActivity implements AdapterView.OnItemCli
 
 
 		return super.onOptionsItemSelected(item);
+	}
+
+	@Override
+	public void onMessage(Message message) {
+		String command = message.command;
+		switch (command) {
+			case "effectRecieved":
+				onEffectRecieved();
+				break;
+			case "gameLost":
+				gameLost();
+				break;
+		}
+	}
+
+	@Override
+	public void onConnect() {
+
 	}
 }

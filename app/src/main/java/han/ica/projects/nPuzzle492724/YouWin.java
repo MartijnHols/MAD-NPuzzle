@@ -31,7 +31,7 @@ public class YouWin extends ActionBarActivity {
 		btnNewGame.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				startActivity(new Intent(YouWin.this, ImageSelection.class));
+				startActivity(new Intent(YouWin.this, ModeSelection.class));
 			}
 		});
 	}

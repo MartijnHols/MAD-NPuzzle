@@ -1,5 +1,7 @@
 # MAD-NPuzzle
-MAD nPuzzle eindopdracht Lars Heesakkers (493712) & Martijn Hols (492724)
+HAN opdracht voor de minor MAD: nPuzzle (eindopdracht Java course) Lars Heesakkers (493712) & Martijn Hols (492724)
+
+Ideas (not all had to be implemented to pass):
 
 Multiplayer element features:
 * Player 2 kiest een afbeelding voor Player 1 en vice versa
